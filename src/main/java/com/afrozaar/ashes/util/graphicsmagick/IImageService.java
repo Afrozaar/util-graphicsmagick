@@ -88,5 +88,6 @@ public interface IImageService {
 
     public void cleanup(String downloadResource);
 
+    ImageInfo getImageInfoAndCopyToRepository(ResourceLocation resourceLocation, StorageType storageType, String path, IStorageRepository storageRepository) throws IOException;
 
 }
