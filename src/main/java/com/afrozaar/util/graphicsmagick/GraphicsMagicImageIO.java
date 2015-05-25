@@ -1,7 +1,6 @@
-package com.afrozaar.ashes.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick;
 
 import com.google.common.base.Splitter;
-import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
 
 import org.springframework.stereotype.Component;
@@ -43,6 +42,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
         op.colorspace("rgb");
         op.resize(maximumWidth, maximumHeight);
+
         String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
         op.addImage(outputFileName);
 
@@ -55,7 +55,30 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         } catch (InterruptedException | IM4JavaException e) {
             throw new IOException(e);
         }
+    }
 
+    public String crop(String tempImageLoc, int height, int width, int offsetx, int offsety, String newSuffix) throws IOException {
+        GMBatchCommand command = new GMBatchCommand(service, "convert");
+
+        IMOperation op = new IMOperation();
+
+        op.addImage(tempImageLoc);
+
+        op.colorspace("rgb");
+        op.crop(width, height, offsetx, offsety);
+
+        String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
+        op.addImage(outputFileName);
+
+        // execute the operation
+        try {
+            LOG.debug("running operation {}", op);
+            command.run(op);
+            LOG.debug("op {} done", op);
+            return outputFileName;
+        } catch (InterruptedException | IM4JavaException e) {
+            throw new IOException(e);
+        }
     }
 
     private String getOutputFileName(String tempImageLoc, String suffix) {

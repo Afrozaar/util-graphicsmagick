@@ -1,27 +1,23 @@
-package com.afrozaar.ashes.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick;
 
 import com.google.common.io.ByteSource;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Random;
 
 public abstract class AbstractImageIO implements IImageService {
 
     protected final Logger LOG = LoggerFactory.getLogger(getClass());
-    @Inject
-    @Named("secureStorageRepository")
-    ISecureStorageRepository storage;
 
     private String tempDir;
     private String tempDirProperty;
@@ -49,18 +45,7 @@ public abstract class AbstractImageIO implements IImageService {
 
     @Override
     public String downloadResource(final String archiveUrl, ByteSource simpleResource) throws IOException {
-        if (storage.exists(StorageType.ARCHIVE, archiveUrl)) {
-            LOG.info("image {} already exists - not processing", archiveUrl);
-            return saveImageToTemp(new ByteSource() {
-
-                @Override
-                public InputStream openStream() throws IOException {
-                    return storage.getInputStream(StorageType.ARCHIVE, archiveUrl);
-                }
-            }, archiveUrl);
-        } else {
-            return saveImageToTemp(simpleResource, archiveUrl);
-        }
+        return saveImageToTemp(simpleResource, archiveUrl);
     }
 
     protected String getTempFileName(String sourceName) {
@@ -103,16 +88,4 @@ public abstract class AbstractImageIO implements IImageService {
         }
     }
 
-    @Override
-    public ImageInfo getImageInfoAndCopyToRepository(ResourceLocation resourceLocation, StorageType storageType, String destPath, IStorageRepository storageRepository)
-            throws IOException {
-
-        final String tempImageLoc = saveImageToTemp(resourceLocation.getByteSource(), resourceLocation.getPath());
-        final ExtendedResourceLocation fileSystemLocation = new FileSystemLocation(storageType, tempImageLoc, new File(tempImageLoc));
-
-        final ImageInfo imageInfo = getImageInfo(tempImageLoc);
-        storageRepository.copy(fileSystemLocation, StorageType.IMAGES, destPath, imageInfo.getMimeType());
-        cleanup(tempImageLoc); // TODO: manual might not be required as there is a scheduled cleanup
-        return imageInfo;
-    }
 }

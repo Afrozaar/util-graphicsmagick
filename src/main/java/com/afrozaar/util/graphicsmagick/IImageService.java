@@ -1,4 +1,4 @@
-package com.afrozaar.ashes.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick;
 
 import com.google.common.io.ByteSource;
 
@@ -87,7 +87,5 @@ public interface IImageService {
     String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException;
 
     public void cleanup(String downloadResource);
-
-    ImageInfo getImageInfoAndCopyToRepository(ResourceLocation resourceLocation, StorageType storageType, String path, IStorageRepository storageRepository) throws IOException;
 
 }

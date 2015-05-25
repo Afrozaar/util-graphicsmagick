@@ -1,4 +1,4 @@
-package com.afrozaar.ashes.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick;
 
 import javax.validation.constraints.NotNull;
 
@@ -38,7 +38,6 @@ public class ImageLoc implements Externalizable {
         this.sourceUrl = sourceUrl;
     }
 
-    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         complex(out);
     }
@@ -52,7 +51,6 @@ public class ImageLoc implements Externalizable {
         out.writeInt(height);
     }
 
-    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         complex(in);
     }
