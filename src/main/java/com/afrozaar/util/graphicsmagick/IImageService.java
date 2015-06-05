@@ -1,5 +1,7 @@
 package com.afrozaar.util.graphicsmagick;
 
+import com.afrozaar.util.graphicsmagick.GraphicsMagicImageIO.XY;
+
 import com.google.common.io.ByteSource;
 
 import java.io.IOException;
@@ -9,6 +11,7 @@ public interface IImageService {
     String resize(String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix) throws IOException;
 
     ByteSource loadImage(String tempImageLoc);
+
 
     public class ImageInfo {
 
@@ -87,5 +90,7 @@ public interface IImageService {
     String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException;
 
     public void cleanup(String downloadResource);
+
+    String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException;
 
 }

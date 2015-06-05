@@ -27,6 +27,24 @@ import java.util.regex.Pattern;
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
 
+    public static class XY {
+        private int x;
+        private int y;
+
+        public XY(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+    }
+
     GMService service = new PooledGMService(new GMConnectionPoolConfig());
 
     private static final Pattern resolutionPattern = Pattern.compile("\\s(\\d+)x(\\d+)");
@@ -57,17 +75,21 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         }
     }
 
-    public String crop(String tempImageLoc, int height, int width, int offsetx, int offsety, String newSuffix) throws IOException {
+    @Override
+    public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
         GMBatchCommand command = new GMBatchCommand(service, "convert");
 
         IMOperation op = new IMOperation();
 
-        op.addImage(tempImageLoc);
+        op.addImage(templateImageLoc);
 
         op.colorspace("rgb");
-        op.crop(width, height, offsetx, offsety);
+        op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
+        if (resizeXY != null) {
+            op.resize(resizeXY.getX(), resizeXY.getY());
+        }
 
-        String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
+        String outputFileName = getOutputFileName(templateImageLoc, newSuffix);
         op.addImage(outputFileName);
 
         // execute the operation
@@ -93,11 +115,11 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         if (suffix == null) {
             suffix = tempSuffix;
         }
-        if (!suffix.startsWith(".")) {
+        if (suffix != null && suffix.trim().length() != 0 && !suffix.startsWith(".")) {
             suffix = "." + suffix;
         }
 
-        return name + "_resize" + random.nextInt(3) + suffix;
+        return name + "_resize" + random.nextInt(3) + (suffix == null ? "" : suffix);
     }
 
     @Override
@@ -152,6 +174,9 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     @Override
     public String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException {
         FileOutputStream output = null;
+        if (sourceName == null) {
+            sourceName = getRandomAlpha(10);
+        }
         try {
             File file = new File(getTempFileName(sourceName));
             output = new FileOutputStream(file);

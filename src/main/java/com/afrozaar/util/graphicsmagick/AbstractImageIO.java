@@ -50,10 +50,13 @@ public abstract class AbstractImageIO implements IImageService {
 
     protected String getTempFileName(String sourceName) {
         String suffix = getExtension(sourceName);
-        return tempDir + File.separator + "resource_" + getRandomAlpha(5) + suffix;
+        return tempDir + File.separator + "resource_" + getRandomAlpha(5) + (suffix == null ? "" : suffix);
     }
 
     protected String getExtension(String imageName) {
+        if (imageName == null) {
+            return "";
+        }
         int indexOf = imageName.lastIndexOf(".");
         if (indexOf != -1) {
             return imageName.substring(indexOf);
@@ -71,7 +74,7 @@ public abstract class AbstractImageIO implements IImageService {
 
     Random random = new Random();
 
-    private String getRandomAlpha(int i) {
+    protected String getRandomAlpha(int i) {
         char[] letters = new char[i];
         for (int k = 0; k < i; k++) {
             letters[k] = alphabet[random.nextInt(26)];
