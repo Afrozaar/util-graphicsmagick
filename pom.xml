@@ -7,7 +7,7 @@
     </parent>
     <artifactId>util-graphicsmagick</artifactId>
     <name>GraphicsMagic Util</name>
-    <version>0.0.10-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <dependencies>
         <dependency>
