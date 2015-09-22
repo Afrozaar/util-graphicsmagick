@@ -21,11 +21,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
+
+    private GMService service = new PooledGMService(new GMConnectionPoolConfig());
 
     public static class XY {
         private int x;
@@ -44,11 +44,6 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             return y;
         }
     }
-
-    GMService service = new PooledGMService(new GMConnectionPoolConfig());
-
-    private static final Pattern resolutionPattern = Pattern.compile("\\s(\\d+)x(\\d+)");
-    private static final Pattern imageType = Pattern.compile("\\s(\\w+)\\s");
 
     @Override
     public String resize(String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix) throws IOException {
@@ -105,7 +100,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     private String getOutputFileName(String tempImageLoc, String suffix) {
         String tempSuffix = getExtension(tempImageLoc);
-        String name = null;
+        String name;
         if (tempSuffix != null) {
             name = tempImageLoc.substring(0, tempImageLoc.indexOf(tempSuffix) - 1);
         } else {
@@ -143,13 +138,9 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             execute = service.execute("identify", "-format", "%w\\n%h\\n%m\\n%t\\n", tempImageLoc);
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
-            StringTokenizer tokenizer = new StringTokenizer(execute, "\n");
-            int width = 0;
-            int height = 0;
-
             List<String> split = Splitter.on('\n').trimResults().splitToList(execute);
-            width = Integer.parseInt(split.get(0));
-            height = Integer.parseInt(split.get(1));
+            int width = Integer.parseInt(split.get(0));
+            int height = Integer.parseInt(split.get(1));
 
             String group = split.get(2);
             String mimeType = "unknown";
@@ -192,10 +183,6 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     @Override
     public void cleanup(String downloadResource) {
         new File(downloadResource).delete();
-    }
-
-    public GMService getService() {
-        return service;
     }
 
 }
