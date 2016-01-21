@@ -94,7 +94,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             LOG.debug("op {} done", op);
             return outputFileName;
         } catch (InterruptedException | IM4JavaException e) {
-            throw new IOException(e);
+            throw new GraphicsMagickException(outputFileName, e.getMessage(), e);
         }
     }
 
@@ -157,7 +157,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             LOG.debug("returning image info {} for url {}", imageInfo, tempImageLoc);
             return imageInfo;
         } catch (GMException | GMServiceException e) {
-            throw new IOException(e);
+            throw new GraphicsMagickException(null, e.getMessage(), e);
         }
 
     }
