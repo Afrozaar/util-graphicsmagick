@@ -9,7 +9,23 @@
     <name>GraphicsMagic Util</name>
     <version>1.2.0-SNAPSHOT</version>
 
+    <properties>
+        <target>1.8</target>
+        <source>1.8</source>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.2.0</version>
+        </dependency>
         <dependency>
             <groupId>com.sharneng</groupId>
             <artifactId>gm4java</artifactId>

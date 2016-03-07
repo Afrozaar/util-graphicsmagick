@@ -1,6 +1,9 @@
 package com.afrozaar.util.graphicsmagick;
 
+import static java.lang.String.format;
+
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.io.ByteSource;
 
 import org.springframework.stereotype.Component;
@@ -21,10 +24,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
 
+    private static final String COMMAND_CONVERT = "convert";
+    private static final String COMMAND_IDENTIFY = "identify";
     private GMService service = new PooledGMService(new GMConnectionPoolConfig());
 
     public static class XY {
@@ -46,8 +53,8 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix) throws IOException {
-        GMBatchCommand command = new GMBatchCommand(service, "convert");
+    public String resize(final String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix) throws IOException {
+        GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
 
         IMOperation op = new IMOperation();
 
@@ -56,7 +63,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         op.colorspace("rgb");
         op.resize(maximumWidth, maximumHeight);
 
-        String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
+        final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
         op.addImage(outputFileName);
 
         // execute the operation
@@ -72,7 +79,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
-        GMBatchCommand command = new GMBatchCommand(service, "convert");
+        GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
 
         IMOperation op = new IMOperation();
 
@@ -100,7 +107,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     private String getOutputFileName(String tempImageLoc, String suffix) {
         String tempSuffix = getExtension(tempImageLoc);
-        String name;
+        final String name;
         if (tempSuffix != null) {
             name = tempImageLoc.substring(0, tempImageLoc.indexOf(tempSuffix) - 1);
         } else {
@@ -110,11 +117,11 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         if (suffix == null) {
             suffix = tempSuffix;
         }
-        if (suffix != null && suffix.trim().length() != 0 && !suffix.startsWith(".")) {
+        if (!Strings.isNullOrEmpty(suffix) && !suffix.startsWith(".")) {
             suffix = "." + suffix;
         }
 
-        return name + "_resize" + random.nextInt(3) + (suffix == null ? "" : suffix);
+        return format("%s_resize%d%s", name, random.nextInt(3), (suffix == null ? "" : suffix));
     }
 
     @Override
@@ -129,13 +136,11 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     }
 
     @Override
-    public ImageInfo getImageInfo(String tempImageLoc) throws IOException {
-
-        String execute;
+    public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta) throws IOException {
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
             LOG.debug("identify on {}", tempImageLoc);
-            execute = service.execute("identify", "-format", "%w\\n%h\\n%m\\n%t\\n", tempImageLoc);
+            String execute = service.execute(COMMAND_IDENTIFY, "-format", "%w\\n%h\\n%m\\n%t\\n", tempImageLoc);
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
             List<String> split = Splitter.on('\n').trimResults().splitToList(execute);
@@ -154,12 +159,27 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             String topName = split.get(3);
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);
+            if (includeMeta) {
+                getImageMetaData(tempImageLoc).ifPresent(imageInfo::setMetaData);
+            }
+
             LOG.debug("returning image info {} for url {}", imageInfo, tempImageLoc);
             return imageInfo;
         } catch (GMException | GMServiceException e) {
             throw new GraphicsMagickException(null, e.getMessage(), e);
         }
+    }
 
+    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc) {
+        // gm identify -verbose ~/Pictures/nikon/nikon_20160214/darktable_exported/img_0001.jpg
+        try {
+            final String execute = service.execute(COMMAND_IDENTIFY, "-verbose", tempImageLoc);
+
+            return MetaParser.parseResult(execute);
+        } catch (IOException | GMException | GMServiceException e) {
+            LOG.error("Error ", e);
+            return Optional.empty();
+        }
     }
 
     @Override

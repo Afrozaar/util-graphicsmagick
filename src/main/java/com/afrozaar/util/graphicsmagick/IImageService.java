@@ -5,6 +5,7 @@ import com.afrozaar.util.graphicsmagick.GraphicsMagicImageIO.XY;
 import com.google.common.io.ByteSource;
 
 import java.io.IOException;
+import java.util.Map;
 
 public interface IImageService {
 
@@ -12,22 +13,20 @@ public interface IImageService {
 
     ByteSource loadImage(String tempImageLoc);
 
-
-    public class ImageInfo {
+    class ImageInfo {
 
         private String topName;
+        private int width;
+        private int height;
+        private String mimeType;
+        private Map<String, Object> metaData;
 
         /**
-         *
-         * @param width
-         *            the images width
-         * @param height
-         *            the images height
-         * @param mimeType
-         *            the mime type of the image
-         * @param topName
-         *            the name of the image without it's path and without its
-         *            extension
+         * @param width    the images width
+         * @param height   the images height
+         * @param mimeType the mime type of the image
+         * @param topName  the name of the image without it's path and without its
+         *                 extension
          */
         public ImageInfo(int width, int height, String mimeType, String topName) {
             super();
@@ -37,11 +36,7 @@ public interface IImageService {
             this.setTopName(topName);
         }
 
-        private int width, height;
-        private String mimeType;
-
         /**
-         *
          * @return mime type of the image
          */
         public String getMimeType() {
@@ -49,7 +44,6 @@ public interface IImageService {
         }
 
         /**
-         *
          * @return the images width
          */
         public int getWidth() {
@@ -57,7 +51,6 @@ public interface IImageService {
         }
 
         /**
-         *
          * @return the images height
          */
         public int getHeight() {
@@ -65,9 +58,8 @@ public interface IImageService {
         }
 
         /**
-         *
-         * @return the "top" name of the iamge - this is the name of the image
-         *         without it's extension and without its path
+         * @return the "top" name of the image - this is the name of the image
+         * without it's extension and without its path
          */
         public String getTopName() {
             return topName;
@@ -77,19 +69,27 @@ public interface IImageService {
             this.topName = topName;
         }
 
+        public Map<String, Object> getMetaData() {
+            return metaData;
+        }
+
+        public void setMetaData(Map<String, Object> metaData) {
+            this.metaData = metaData;
+        }
+
         @Override
         public String toString() {
             return "ImageInfo [topName=" + topName + ", width=" + width + ", height=" + height + ", mimeType=" + mimeType + "]";
         }
     }
 
-    ImageInfo getImageInfo(String tempImageLoc) throws IOException;
+    ImageInfo getImageInfo(String tempImageLoc, boolean includeMeta) throws IOException;
 
     String downloadResource(String archiveUrl, ByteSource simpleResource) throws IOException;
 
     String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException;
 
-    public void cleanup(String downloadResource);
+    void cleanup(String downloadResource);
 
     String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException;
 
