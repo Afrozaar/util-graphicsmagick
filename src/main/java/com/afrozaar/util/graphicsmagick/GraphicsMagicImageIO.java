@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 
 import org.springframework.stereotype.Component;
@@ -136,7 +137,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     }
 
     @Override
-    public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta) throws IOException {
+    public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, String format) throws IOException {
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
             LOG.debug("identify on {}", tempImageLoc);
@@ -160,7 +161,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);
             if (includeMeta) {
-                getImageMetaData(tempImageLoc).ifPresent(imageInfo::setMetaData);
+                getImageMetaData(tempImageLoc, format).ifPresent(imageInfo::setMetaData);
             }
 
             LOG.debug("returning image info {} for url {}", imageInfo, tempImageLoc);
@@ -170,10 +171,14 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         }
     }
 
-    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc) {
+    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc, String format) {
         // gm identify -verbose ~/Pictures/nikon/nikon_20160214/darktable_exported/img_0001.jpg
         try {
             final String execute = service.execute(COMMAND_IDENTIFY, "-verbose", tempImageLoc);
+
+            if (!Strings.isNullOrEmpty(format) && "raw".equalsIgnoreCase(format)) {
+                return Optional.of(ImmutableMap.of("data", execute));
+            }
 
             return MetaParser.parseResult(execute);
         } catch (IOException | GMException | GMServiceException e) {
