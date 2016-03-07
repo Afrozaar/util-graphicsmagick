@@ -1,0 +1,209 @@
+Image: 55351981.JPG
+  Format: JPEG (Joint Photographic Experts Group JFIF format)
+  Geometry: 671x800
+  Class: DirectClass
+  Type: true color
+  Depth: 8 bits-per-pixel component
+  Channel Depths:
+    Red:      8 bits
+    Green:    8 bits
+    Blue:     8 bits
+  Channel Statistics:
+    Red:
+      Minimum:                     0.00 (0.0000)
+      Maximum:                   255.00 (1.0000)
+      Mean:                      168.79 (0.6619)
+      Standard Deviation:         67.38 (0.2642)
+    Green:
+      Minimum:                     0.00 (0.0000)
+      Maximum:                   255.00 (1.0000)
+      Mean:                      142.02 (0.5569)
+      Standard Deviation:         69.47 (0.2724)
+    Blue:
+      Minimum:                     0.00 (0.0000)
+      Maximum:                   255.00 (1.0000)
+      Mean:                      136.79 (0.5364)
+      Standard Deviation:         68.97 (0.2705)
+  Resolution: 170x170 pixels/inch
+  Filesize: 94.4K
+  Interlace: No
+  Orientation: TopLeft
+  Background Color: white
+  Border Color: #DFDFDF
+  Matte Color: #BDBDBD
+  Compose: Over
+  Dispose: Undefined
+  Iterations: 0
+  Compression: JPEG
+  JPEG-Quality: 75
+  JPEG-Colorspace: 2
+  JPEG-Colorspace-Name: RGB
+  JPEG-Sampling-factors: 2x2,1x1,1x1
+  Signature: a902d6eaeaaae7100f3b2de28381a39a364270d33c503eca12bdfd5f153e4a54
+  Profile-color: 7304 bytes
+  Profile-iptc: 13972 bytes
+    City:
+  0x00000000: 254700                                        -%
+    unknown:
+  
+    Caption:
+  Sampie Mastriet of the Lions (r) embraced by Ricky Schroeder of the Lions after scoring try during the 2015 Absa Currie Cup rugby match between the Lions and Griquas at Ellis Park Stadium in Johannesburg, South Africa on 10 September, 2015 ©Gavin Barker/BackpagePix
+    Headline:
+  Rugby - 2015 Absa Currie Cup - Lions v Griquas - Ellis Park
+    Special Instructions:
+  This image is intended for Editorial use (e.g. news articles). Any commercial use (e.g. ad campaigns) requires additional clearance. Contact: photo@backpagemedia.co.za for more information
+    Byline:
+  Gavin Barker/BackpagePix
+    Byline Title:
+  Backpagepix Staff
+    Credit:
+  BackpagePix
+    Source:
+  BACKPAGE
+    Image Name:
+  151010R_Cc_LioGrq_Gb
+    Created Date:
+  20151010
+    Created Time:
+  162430+0200
+    City:
+  Johannesburg
+    unknown:
+  Ellis Park Stadium
+    Province State:
+  Gauteng
+    Country:
+  South Africa
+    Country Code:
+  ZAR
+    Original Transmission Reference:
+  15JJGB
+    Category:
+  Spo
+    Supplemental Category:
+  Rugby
+    Supplemental Category:
+  South Africa Domestic 
+    Supplemental Category:
+  2015 Currie Cup 
+    Priority:
+  1
+    Copyright String:
+  ©Backpagepix 2015
+    Edit Status:
+  Sent
+    unknown:
+  0:2:0:009097
+    unknown:
+  0x00000000: 49055805 67057705 ff05ff05 ff05ff05 ff05ff05  -I-X-g-w------------
+  0x00000014: ff05ff06 06061606 27063706 48065906 6a067b06  ---------'-7-H-Y-j-{
+  0x00000028: ff06ff06 ff06ff06 ff06ff06 ff070707 19072b07  -------------------+
+  0x0000003c: 3d074f07 61077407 ff07ff07 ff07ff07 ff07ff07  -=-O-a-t------------
+  0x00000050: ff080b08 1f083208 46085a08 6e08ff08 ff08ff08  -------2-F-Z-n------
+  0x00000064: ff08ff08 ff08ff09 10092509 3a094f09 64097909  -----------%-:-O-d-y
+  0x00000078: ff09ff09 ff09ff09 ff09ff0a 110a270a 3d0a540a  ---------------'-=-T
+  0x0000008c: 6a0aff0a ff0aff0a ff0aff0a ff0b0b0b 220b390b  -j---------------"-9
+  0x000000a0: 510b690b ff0bff0b ff0bff0b ff0bff0c 120c2a0c  -Q-i---------------*
+  0x000000b4: 430c5c0c 750cff0c ff0cff0c ff0cff0d 0d0d260d  -C-\-u-------------&
+  0x000000c8: 400d5a0d 740dff0d ff0dff0d ff0dff0e 130e2e0e  -@-Z-t-------------.
+  0x000000dc: 490e640e 7f0eff0e ff0eff0e ff0f090f 250f410f  -I-d-------------%-A
+  0x000000f0: 5e0f7a0f ff0fff0f ff0fff10 09102610 43106110  -^-z-----------&-C-a
+  0x00000104: 7e10ff10 ff10ff10 ff111311 31114f11 6d11ff11  -~-----------1-O-m--
+  0x00000118: ff11ff11 ff120712 26124512 6412ff12 ff12ff12  ---------&-E-d------
+  0x0000012c: ff130313 23134313 6313ff13 ff13ff13 ff140614  -----#-C-c----------
+  0x00000140: 27144914 6a14ff14 ff14ff14 ff151215 34155615  -'-I-j-----------4-V
+  0x00000154: 7815ff15 ff15ff16 03162616 49166c16 ff16ff16  -x---------&-I-l----
+  0x00000168: ff16ff17 1d174117 6517ff17 ff17ff17 ff181b18  -------A-e----------
+  0x0000017c: 40186518 ff18ff18 ff18ff19 20194519 6b19ff19  -@-e--------- -E-k--
+  0x00000190: ff19ff1a 041a2a1a 511a771a ff1aff1a ff1b141b  -------*-Q-w--------
+  0x000001a4: 3b1b631b ff1bff1b ff1c021c 2a1c521c 7b1cff1c  -;-c---------*-R-{--
+  0x000001b8: ff1cff1d 1e1d471d 701dff1d ff1dff1e 161e401e  -------G-p---------@
+  0x000001cc: 6a1eff1e ff1eff1f 131f3e1f 691fff1f ff1fff20  -j--------->-i------
+  0x000001e0: 15204120 6c20ff20 ff20ff21 1c214821 7521ff21   - A l - - -!-!H!u!-
+  0x000001f4: ff21ff22 27225522 ff22ff22 ff230a23 38236623  !-!-"'"U"-"-"-#-#8#f
+  0x00000208: ff23ff23 ff241f24 4d247c24 ff24ff25 09253825  #-#-#-$-$M$|$-$-%-%8
+  0x0000021c: 6825ff25 ff25ff26 27265726 ff26ff26 ff271827  %h%-%-%-&'&W&-&-&-'-
+  0x00000230: 49277a27 ff27ff28 0d283f28 7128ff28 ff290629  'I'z'-'-(-(?(q(-(-)-
+  0x00000244: 38296b29 ff29ff2a 022a352a 682aff2a ff2b022b  )8)k)-)-*-*5*h*-*-+-
+  0x00000258: 362b692b ff2bff2c 052c392c 6e2cff2c ff2d0c2d  +6+i+-+-,-,9,n,-,---
+  0x0000026c: 412d762d ff2dff2e 162e4c2e ff2eff2e ff2f242f  -A-v----.-.L.-.-.-/$
+  0x00000280: 5a2fff2f ff2fff30 35306c30 ff30ff31 12314a31  /Z/-/-/-050l0-0-1-1J
+  0x00000294: ff31ff31 ff322a32 6332ff32 ff330d33 46337f33  1-1-1-2*2c2-2-3-3F3-
+  0x000002a8: ff33ff34 2b346534 ff34ff35 13354d35 ff35ff35  3-3-4+4e4-4-5-5M5-5-
+  0x000002bc: ff363736 7236ff36 ff372437 6037ff37 ff381438  5-676r6-6-7$7`7-7-8-
+  0x000002d0: 5038ff38 ff390539 42397f39 ff39ff3a 363a743a  8P8-8-9-9B9-9-9-:6:t
+  0x000002e4: ff3aff3b 2d3b6b3b ff3bff3c 273c653c ff3cff3d  :-:-;-;k;-;-<'<e<-<-
+  0x000002f8: 223d613d ff3dff3e 203e603e ff3eff3f 213f613f  ="=a=-=-> >`>->-?!?a
+  0x0000030c: ff3fff40 23406440 ff40ff41 29416a41 ff41ff42  ?-?-@#@d@-@-A)AjA-A-
+  0x00000320: 30427242 ff42ff43 3a437d43 ff440344 4744ff44  B0BrB-B-C:C}C-D-DGD-
+  0x00000334: ff451245 5545ff45 ff462246 6746ff46 ff473547  D-E-EUE-E-F"FgF-F-G5
+  0x00000348: 7b47ff48 05484b48 ff48ff49 1d496349 ff49ff4a  G{G-H-HKH-H-I-IcI-I-
+  0x0000035c: 374a7d4a ff4b0c4b 534bff4b ff4c2a4c 724cff4d  J7J}J-K-KSK-K-L*Lr
+  0x00000370: ff4d024d 4a4dff4d ff4e254e 6e4eff4f 00        L-M-MJM-M
+    unknown:
+  0x00000000: 75ffffff 5cffffff 44ffffff 2dffffff 16ffffff  -u---\---D-
+  0x00000014: ff2dffff ff16ffff ff00                        -----
+  Profile-EXIF: 1374 bytes
+    Image Width: 3280
+    Image Length: 4928
+    Bits Per Sample: 8
+    Image Description: Sampie Mastriet of the Lions (r) embraced by Ricky Schroeder of the Lions after scoring try during the 2015 Absa Currie Cup rugby match between the Lions and Griquas at Ellis Park Stadium in Johannesburg, South Africa on 10 September, 2015 \302\251Gavin Barker/BackpagePix
+    Make: NIKON CORPORATION
+    Model: NIKON D4
+    Orientation: 1
+    Samples Per Pixel: 3
+    X Resolution: 3000000/10000
+    Y Resolution: 3000000/10000
+    Resolution Unit: 2
+    Software: Adobe Photoshop CS6 (Macintosh)
+    Date Time: 2015:10:10 17:37:46
+    Artist: Gavin Barker/BackpagePix
+    Y Cb Cr Positioning: 2
+    Copyright: \302\251Backpagepix 2015
+    Exif Offset: 646
+    Exposure Time: 10/20000
+    F Number: 35/10
+    Exposure Program: 1
+    ISO Speed Ratings: 800
+    0x8830: 2
+    Exif Version: 0230
+    Date Time Original: 2015:10:10 16:24:30
+    Date Time Digitized: 2015:10:10 16:24:30
+    Components Configuration: \001\002\003\000
+    Compressed Bits Per Pixel: 4/1
+    Shutter Speed Value: 10965784/1000000
+    Aperture Value: 361471/100000
+    Exposure Bias Value: 0/6
+    Max Aperture Value: 30/10
+    Metering Mode: 2
+    Light Source: 0
+    Flash: 0
+    Focal Length: 4000/10
+    User Comment: ASCII\000\000\000                                    
+    Sub Sec Time: 60
+    Sub Sec Time Original: 60
+    Sub Sec Time Digitized: 60
+    Flash Pix Version: 0100
+    Color Space: 65535
+    Exif Image Width: 2992
+    Exif Image Length: 3568
+    Interoperability Offset: 0
+    Sensing Method: 2
+    File Source: \003
+    Scene Type: \001
+    CFA Pattern: \000\002\000\002\000\001\001\002
+    Custom Rendered: 0
+    Exposure Mode: 1
+    White Balance: 0
+    Digital Zoom Ratio: 1/1
+    Focal Length In35mm Film: 400
+    Scene Capture Type: 0
+    Gain Control: 1
+    Contrast: 0
+    Saturation: 0
+    Sharpness: 2
+    Subject Distance Range: 0
+    GPS Info: 1350
+  Profile-APP1: 6883 bytes
+  Tainted: False
+  User Time: 0.010u
