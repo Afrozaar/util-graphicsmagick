@@ -83,7 +83,7 @@ public interface IImageService {
         }
     }
 
-    ImageInfo getImageInfo(String tempImageLoc, boolean includeMeta, String format) throws IOException;
+    ImageInfo getImageInfo(String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException;
 
     String downloadResource(String archiveUrl, ByteSource simpleResource) throws IOException;
 
