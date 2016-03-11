@@ -39,7 +39,7 @@ public class MetaParser {
 
             if (Objects.nonNull(last) && (isNonKeyValueEntry(split) || isPossibleRogueDataLine)) {
                 final String newValue = isPossibleRogueDataLine ? line.trim() : split[0].trim();
-                LOG.debug("Updating last data key={} value={}", last.data.getKey(), newValue);
+                LOG.trace("Updating last data key={} value={}", last.data.getKey(), newValue);
                 last.data = new AbstractMap.SimpleImmutableEntry<>(last.data.getKey(), newValue);
             } else {
                 final Meta entry = Meta.of(split);
@@ -90,7 +90,7 @@ public class MetaParser {
             return count;
         } else {
             int newCount = input.charAt(index) == chr ? count + 1 : count;
-            return charCount(newCount, chr, index+1, input);
+            return charCount(newCount, chr, index + 1, input);
         }
     }
 
@@ -103,9 +103,12 @@ public class MetaParser {
     }
 
     /**
-     * A possible rogue line contains a ':' which is not a field separator, eg.: 'This is some random text that belongs to a previous entry: noted?'
-     * Also, the indentation is broken. At this stage it is not certain whether it is a data entry issue onto the meta entry or not.
-     * Currently it is hard to tell the conditions would indicate a rogue line, but a good guess is that anything NOT matching [\w\d\:\-] can indicate this.
+     * A possible rogue line contains a ':' which is not a field separator, eg.:
+     * 'This is some random text that belongs to a previous entry: noted?' Also,
+     * the indentation is broken. At this stage it is not certain whether it is
+     * a data entry issue onto the meta entry or not. Currently it is hard to
+     * tell the conditions would indicate a rogue line, but a good guess is that
+     * anything NOT matching [\w\d\:\-] can indicate this.
      */
     private static boolean isPossibleRogueDataLine(String[] split) {
 

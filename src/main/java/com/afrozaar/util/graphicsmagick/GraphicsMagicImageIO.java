@@ -62,7 +62,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         op.addImage(tempImageLoc);
 
         op.colorspace("rgb");
-        op.resize(maximumWidth, maximumHeight);
+        op.resize(maximumWidth, maximumHeight, ">");
 
         final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
         op.addImage(outputFileName);
@@ -89,7 +89,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         op.colorspace("rgb");
         op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
         if (resizeXY != null) {
-            op.resize(resizeXY.getX(), resizeXY.getY());
+            op.resize(resizeXY.getX(), resizeXY.getY(), ">");
         }
 
         String outputFileName = getOutputFileName(templateImageLoc, newSuffix);
@@ -137,7 +137,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     }
 
     @Override
-    public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, String format) throws IOException {
+    public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException {
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
             LOG.debug("identify on {}", tempImageLoc);
@@ -171,12 +171,12 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         }
     }
 
-    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc, String format) {
+    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc, MetaDataFormat format) {
         // gm identify -verbose ~/Pictures/nikon/nikon_20160214/darktable_exported/img_0001.jpg
         try {
             final String execute = service.execute(COMMAND_IDENTIFY, "-verbose", tempImageLoc);
 
-            if (!Strings.isNullOrEmpty(format) && "raw".equalsIgnoreCase(format)) {
+            if (format == MetaDataFormat.RAW) {
                 return Optional.of(ImmutableMap.of("data", execute));
             }
 
