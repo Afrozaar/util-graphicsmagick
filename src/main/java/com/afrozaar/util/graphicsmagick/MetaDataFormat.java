@@ -6,16 +6,10 @@ public enum MetaDataFormat {
     RAW, PARSED;
 
     public static MetaDataFormat fromString(String format0) {
-        final Optional<String> format = Optional.ofNullable(format0);
-        if (format.isPresent()) {
-            try {
-                return valueOf(format.get().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return MetaDataFormat.PARSED;
-            }
-        } else {
+        try {
+            return Optional.ofNullable(format0).map(e -> valueOf(e.toUpperCase())).orElse(PARSED);
+        } catch (IllegalArgumentException e) {
             return MetaDataFormat.PARSED;
         }
     }
-
 }
