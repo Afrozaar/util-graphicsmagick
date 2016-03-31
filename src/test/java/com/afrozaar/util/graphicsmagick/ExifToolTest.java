@@ -9,6 +9,8 @@ import com.afrozaar.util.graphicsmagick.exiftool.ExiftoolException;
 import com.afrozaar.util.graphicsmagick.exiftool.KnownProfile;
 import com.afrozaar.util.test.TestUtil;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -19,9 +21,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Set;
 
@@ -83,6 +88,40 @@ public class ExifToolTest {
     public void getKnowProfiles_MustReturnSupportedProfiles() {
         final Set<String> supportedProfiles = exifTool.getSupportedProfiles();
         supportedProfiles.forEach(KnownProfile::valueOf);
+    }
+
+    @Test
+    public void setTags() throws ExiftoolException, URISyntaxException, IOException {
+        final URI source = ExifToolTest.class.getResource("/bin/Picture_600x400.jpg").toURI();
+
+        final String location = copyToTemp(source);
+
+        final String copyright = "Baobab";
+        final String artist = "some-artist";
+        final String sourceS = "hot-off-the-press";
+
+        final ImmutableMap.Builder<String, Object> builder = ImmutableMap.<String, Object>builder()
+                .put("Creator", artist)
+                .put("usercomment", copyright)
+                .put("copyright", copyright)
+                .put("rights", copyright)
+                .put("copyrightnotice", copyright)
+                .put("source", sourceS)
+                .put("credit", sourceS)
+                ;
+
+        final JsonNode jsonNode = exifTool.setTags(location, builder.build());
+
+        LOG.info("updated jsonNode: {}", jsonNode);
+
+    }
+
+    private String copyToTemp(URI source) throws IOException {
+        final Path tempFile = Files.createTempFile("junit-pic-", ".jpg");
+
+        Files.copy(Paths.get(source), tempFile, StandardCopyOption.REPLACE_EXISTING);
+
+        return tempFile.toAbsolutePath().toString();
     }
 
 }

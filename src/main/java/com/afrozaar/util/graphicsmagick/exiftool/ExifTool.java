@@ -1,5 +1,7 @@
 package com.afrozaar.util.graphicsmagick.exiftool;
 
+import static java.lang.String.format;
+
 import com.afrozaar.util.graphicsmagick.exiftool.AbstractJsonResponseConsumer.Builder;
 
 import com.google.common.collect.ImmutableMap;
@@ -24,13 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ExifTool {
+public class ExifTool implements IExifTool {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExifTool.class);
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    private final Function<Map.Entry, String> tagString = entry -> format("%s=%s", entry.getKey(), entry.getValue());
+
+    @Override
     public JsonNode getTags(final String... fileLocations) throws ExiftoolException {
         final ETOps exifOp = new ETOperation().json().groupHeadings("");
 
@@ -70,22 +76,49 @@ public class ExifTool {
         }
     }
 
+    @Override
     public Set<String> getProfiles(ObjectNode node) {
         final Set<String> profiles = Sets.newHashSet(node.fieldNames());
         profiles.removeAll(Arrays.asList("SourceFile", "ExifTool"));
         return ImmutableSet.copyOf(profiles);
     }
 
+    @Override
     public Set<String> getSupportedProfiles() {
         return Arrays.stream(KnownProfile.values())
                 .map(KnownProfile::name)
                 .collect(Collectors.toSet());
     }
 
+    @Override
     public Map<String, Object> getEntriesForProfile(ObjectNode node, KnownProfile profile) {
         final JsonNode profileNode = node.path(profile.name());
         final ImmutableMap.Builder<String, Object> map = ImmutableMap.builder();
         profileNode.fields().forEachRemaining(entry -> map.put(entry.getKey(), entry.getValue()));
         return map.build();
+    }
+
+    @Override
+    public JsonNode setTags(final String fileLocation, Map<String, Object> tagMap) throws ExiftoolException {
+
+        final ETOps ops = new ETOperation();
+
+        final List<String> tags = tagMap.entrySet().stream().map(tagString).collect(Collectors.toList());
+
+        ((ETOperation) ops).setTags(tags.toArray(new String[tags.size()]));
+        ops.addImage(ETOperation.IMG_PLACEHOLDER);
+
+        LOG.trace("set tags on '{}' ops: {}", fileLocation, ops);
+
+        ImageCommand command = new ExiftoolCmd();
+
+        try {
+            command.run(ops, fileLocation);
+        } catch (IOException | InterruptedException | IM4JavaException e) {
+            LOG.error("Error ", e);
+        }
+
+        // finally read tags again and return latest data
+        return getTags(fileLocation);
     }
 }
