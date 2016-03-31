@@ -1,0 +1,18 @@
+<configuration>
+    <jmxConfigurator />
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>Util-GM %d %-5level [%thread] %logger{10}.%method\(\) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.afrozaar.util.graphicsmagick.exiftool" level="TRACE" />
+    <logger name="com.afrozaar" level="TRACE" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>
+
