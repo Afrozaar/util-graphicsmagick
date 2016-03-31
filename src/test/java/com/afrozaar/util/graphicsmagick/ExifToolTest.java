@@ -2,33 +2,28 @@ package com.afrozaar.util.graphicsmagick;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.junit.Assert.fail;
+
 import com.afrozaar.util.graphicsmagick.exiftool.ExifTool;
 import com.afrozaar.util.graphicsmagick.exiftool.ExiftoolException;
-import com.afrozaar.util.graphicsmagick.exiftool.JsonResponseConsumer;
-
-import com.google.common.io.ByteSource;
+import com.afrozaar.util.graphicsmagick.exiftool.KnownProfile;
+import com.afrozaar.util.test.TestUtil;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.im4java.core.ETOperation;
-import org.im4java.core.ExiftoolCmd;
-import org.im4java.core.IM4JavaException;
-import org.im4java.core.ImageCommand;
-import org.im4java.process.OutputConsumer;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author johan
@@ -41,32 +36,53 @@ public class ExifToolTest {
 
     @Test
     public void getAllTags() throws URISyntaxException, ExiftoolException {
+        final String location = new File(ExifToolTest.class.getResource("/bin/Picture_600x400.jpg").toURI()).getAbsolutePath();
 
-        final URL resource = ExifToolTest.class.getResource("/bin/Picture_600x400.jpg");
-
-        final String location = new File(resource.toURI()).getAbsolutePath();
-
-        final JsonNode results = exifTool.getTags(location, location);
+        final JsonNode results = exifTool.getTags(location, "");
 
         assertThat(results).isNotNull();
 
         if (results.isArray()) {
-            results.forEach(result -> {
-                System.out.println("result");
-                result.fieldNames().forEachRemaining(body -> {
-                    System.out.println("field = " + body);
-                });
+            results.forEach(arrResult -> {
+                ObjectNode result = (ObjectNode) arrResult;
+                final Set<String> profiles = exifTool.getProfiles(result);
+                LOG.debug("profiles: {}", profiles);
+                final Map<String, Object> exifEntries = exifTool.getEntriesForProfile(result, KnownProfile.EXIF);
+                LOG.debug("exifEntries: {}", exifEntries);
             });
+        } else {
+            fail("Expected array result.");
         }
-
-        final JsonNode exif = results.path("EXIF");
-
-        assertThat(exif).isNotNull();
     }
 
+    @Test(expected = ExiftoolException.class)
+    public void getAllTagsWithNonMediaFile_MustReturnError() throws ExiftoolException, IOException {
+        String temporaryLoc = null;
+        try {
+            final File newTemporaryFile = Files.createTempFile("exiftool-junit", ".php").toFile();
+            temporaryLoc = newTemporaryFile.getAbsolutePath();
+            FileWriter fileWriter = new FileWriter(newTemporaryFile);
+            fileWriter.write(TestUtil.randomString(200));
+            fileWriter.flush();
+            exifTool.getTags(temporaryLoc);
+        } catch (IOException e) {
+            fail();
+        } finally {
+            if (temporaryLoc != null) {
+                try {
+                    Files.deleteIfExists(Paths.get(temporaryLoc));
+                } catch (IOException e) {
+                    LOG.error("Error ", e);
+                }
 
+            }
+        }
+    }
 
-
-
+    @Test
+    public void getKnowProfiles_MustReturnSupportedProfiles() {
+        final Set<String> supportedProfiles = exifTool.getSupportedProfiles();
+        supportedProfiles.forEach(KnownProfile::valueOf);
+    }
 
 }

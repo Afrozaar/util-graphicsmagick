@@ -33,4 +33,24 @@ public abstract class AbstractJsonResponseConsumer implements OutputConsumer, Er
     public void consumeOutput(InputStream inputStream) throws IOException {
         throw new UnsupportedOperationException("Method not overridden.");
     }
+
+    static class Builder {
+        private final ObjectMapper mapper;
+
+        private Builder(ObjectMapper mapper) {
+            this.mapper = mapper;
+        }
+
+        public static Builder using(ObjectMapper mapper) {
+            return new Builder(mapper);
+        }
+
+        JsonErrorResponseConsumer newErrorConsumer() {
+            return new JsonErrorResponseConsumer(mapper);
+        }
+
+        JsonResponseConsumer newConsumer() {
+            return new JsonResponseConsumer(mapper);
+        }
+    }
 }

@@ -12,7 +12,7 @@ import java.util.function.BiFunction;
 
 public class JsonErrorResponseConsumer extends AbstractJsonResponseConsumer {
 
-    public JsonErrorResponseConsumer(ObjectMapper objectMapper) {
+    JsonErrorResponseConsumer(ObjectMapper objectMapper) {
         super(objectMapper);
     }
 
