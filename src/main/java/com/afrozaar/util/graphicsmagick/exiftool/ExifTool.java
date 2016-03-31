@@ -99,7 +99,7 @@ public class ExifTool implements IExifTool {
     }
 
     @Override
-    public JsonNode setTags(final String fileLocation, Map<String, Object> tagMap) throws ExiftoolException {
+    public JsonNode setTags(final String fileLocation, Map<SupportedTag, Object> tagMap) throws ExiftoolException {
 
         final ETOps ops = new ETOperation();
 
