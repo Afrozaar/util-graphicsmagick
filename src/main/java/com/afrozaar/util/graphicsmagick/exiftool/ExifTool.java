@@ -103,22 +103,23 @@ public class ExifTool implements IExifTool {
 
         final ETOps ops = new ETOperation();
 
-        final List<String> tags = tagMap.entrySet().stream().map(tagString).collect(Collectors.toList());
+        final List<String> profileTags = Profiles.getProfileTagStringsForRequestedTags(tagMap);
 
-        ((ETOperation) ops).setTags(tags.toArray(new String[tags.size()]));
+        ((ETOperation) ops).setTags(profileTags.toArray(new String[profileTags.size()]));
         ops.addImage(ETOperation.IMG_PLACEHOLDER);
 
         LOG.trace("set tags on '{}' ops: {}", fileLocation, ops);
 
-        ImageCommand command = new ExiftoolCmd();
+        final ImageCommand command = new ExiftoolCmd();
 
         try {
             command.run(ops, fileLocation);
+            // read tags again and return latest data
+            return getTags(fileLocation);
         } catch (IOException | InterruptedException | IM4JavaException e) {
-            LOG.error("Error ", e);
+            LOG.error("Error setting tags on {}", fileLocation, e);
+            throw new RuntimeException("Can not set tags on " + fileLocation, e);
         }
 
-        // finally read tags again and return latest data
-        return getTags(fileLocation);
     }
 }

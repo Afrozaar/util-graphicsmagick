@@ -2,7 +2,10 @@ package com.afrozaar.util.graphicsmagick.exiftool;
 
 import static com.afrozaar.util.graphicsmagick.exiftool.Profile.Builder.aProfile;
 
+import static java.lang.String.format;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +21,13 @@ public class Profiles {
         return Stream.of(XMP, IPTC, EXIF, File)
                 .map(profile -> profile.getTagString(supportedTag))
                 .filter(Optional::isPresent).map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    public static List<String> getProfileTagStringsForRequestedTags(Map<SupportedTag, Object> tagMap) {
+        return tagMap.entrySet().stream()
+                .flatMap(entry -> getMatchingTags(entry.getKey()).stream()
+                        .map(profileTag -> format("%s=%s", profileTag, entry.getValue())))
                 .collect(Collectors.toList());
     }
 

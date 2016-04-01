@@ -28,6 +28,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -96,17 +97,9 @@ public class ExifToolTest {
         final URI source = ExifToolTest.class.getResource("/bin/Picture_600x400.jpg").toURI();
 
         final String location = copyToTemp(source);
+        final ImmutableMap.Builder<SupportedTag, Object> builder = ImmutableMap.builder();
 
-        final String copyright = "Baobab";
-        final String artist = "some-artist";
-        final String sourceS = "hot-off-the-press";
-
-        final ImmutableMap.Builder<SupportedTag, Object> builder = ImmutableMap.<SupportedTag, Object>builder()
-                .put(SupportedTag.Creator, artist)
-                .put(SupportedTag.Description, copyright)
-                .put(SupportedTag.Rights, copyright)
-                .put(SupportedTag.Source, sourceS)
-                .put(SupportedTag.Credit, sourceS);
+        Arrays.stream(SupportedTag.values()).forEach(tag -> builder.put(tag, TestUtil.randomString(150, true)));
 
         final JsonNode jsonNode = exifTool.setTags(location, builder.build());
 
