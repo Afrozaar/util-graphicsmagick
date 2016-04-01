@@ -1,8 +1,11 @@
 package com.afrozaar.util.graphicsmagick.exiftool;
 
+import static java.lang.String.format;
+
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class Profile {
 
@@ -12,6 +15,10 @@ public class Profile {
     private Profile(String name, Map<SupportedTag, String> tagMap) {
         this.name = name;
         this.tagMap = tagMap;
+    }
+
+    public Optional<String> getTagString(SupportedTag supportedTag) {
+        return tagMap.containsKey(supportedTag) ? Optional.of(format("%s:%s", name, tagMap.get(supportedTag))) : Optional.empty();
     }
 
     public static class Builder {
