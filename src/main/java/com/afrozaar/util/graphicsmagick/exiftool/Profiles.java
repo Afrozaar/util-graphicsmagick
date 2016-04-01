@@ -49,21 +49,24 @@ public class Profiles {
                 .withTag(SupportedTag.Rights, "Rights")
                 .build();
 
+        /**
+         * @see <a href="https://www.iptc.org/std/Iptc4xmpCore/1.0/specification/Iptc4xmpCore_1.0-spec-XMPSchema_8.pdf">IPTC Core XMP Schema</a>
+         */
         IPTC = aProfile("IPTC")
-                .withTag(SupportedTag.Description, "Caption-Abstract")
-                .withTag(SupportedTag.Title, "ObjectName")
-                .withTag(SupportedTag.Creator, "By-line")
-                .withTag(SupportedTag.TransmissionRef, "OriginalTransmissionReference")
-                .withTag(SupportedTag.CaptionWriter, "Writer-Editor")
+                .withTag(SupportedTag.Description, "Caption-Abstract") // 2000 bytes
+                .withTag(SupportedTag.Title, "ObjectName") // 64 bytes
+                .withTag(SupportedTag.Creator, "By-line") // 32 bytes
+                .withTag(SupportedTag.TransmissionRef, "OriginalTransmissionReference") // 32 bytes
+                .withTag(SupportedTag.CaptionWriter, "Writer-Editor") // 32 bytes
                 .withTag(SupportedTag.Category, "Category")
                 .withTag(SupportedTag.Urgency, "Urgency")
-                .withTag(SupportedTag.AuthorsPosition, "By-lineTitle")
-                .withTag(SupportedTag.Credit, "Credit")
-                .withTag(SupportedTag.Source, "Source")
+                .withTag(SupportedTag.AuthorsPosition, "By-lineTitle") // 32 bytes
+                .withTag(SupportedTag.Credit, "Credit") // 32 bytes
+                .withTag(SupportedTag.Source, "Source") // 32 bytes
                 .withTag(SupportedTag.SupplementalCategories, "SupplementalCategories")
-                .withTag(SupportedTag.City, "City")
-                .withTag(SupportedTag.Country, "Country-PrimaryLocationName")
-                .withTag(SupportedTag.Rights, "CopyrightNotice")
+                .withTag(SupportedTag.City, "City") // 32 bytes
+                .withTag(SupportedTag.Country, "Country-PrimaryLocationName") // 64 bytes
+                .withTag(SupportedTag.Rights, "CopyrightNotice") // 128 bytes
                 .build();
 
         EXIF = aProfile("EXIF")
