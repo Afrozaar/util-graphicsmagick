@@ -21,6 +21,17 @@ public class Profile {
         return tagMap.containsKey(supportedTag) ? Optional.of(format("%s:%s", name, tagMap.get(supportedTag))) : Optional.empty();
     }
 
+    /*
+    Having thoughts of using BiMaps here to look up the SupportedTag from a String value if found.
+     */
+    public boolean supportsTag(String supportedTagString) {
+        try {
+            return tagMap.containsKey(SupportedTag.valueOf(supportedTagString));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     public static class Builder {
         String name;
 

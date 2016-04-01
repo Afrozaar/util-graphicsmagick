@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableMap;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,21 @@ import java.util.Set;
 public class ExifToolTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExifToolTest.class);
+    public static final String TEST_PICTURE = "/bin/Picture_600x400.jpg";
 
     private ExifTool exifTool = new ExifTool();
 
+    @AfterClass
+    public static void cleanup() {
+        final Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"));
+        final String[] toDelete = tmpDir.toFile().list((dir, name) -> name.matches("^(junit-pic-|exiftool-junit).*"));
+        LOG.info("removing {}",  Arrays.asList(toDelete));
+        Arrays.stream(toDelete).forEach(fileString -> LOG.info("{} deleted: {}", fileString, new File(tmpDir.toFile(), fileString).delete()));
+    }
+
     @Test
     public void getAllTags() throws URISyntaxException, ExiftoolException {
-        final String location = new File(ExifToolTest.class.getResource("/bin/Picture_600x400.jpg").toURI()).getAbsolutePath();
+        final String location = new File(ExifToolTest.class.getResource(TEST_PICTURE).toURI()).getAbsolutePath();
 
         final JsonNode results = exifTool.getTags(location, "");
 
@@ -90,17 +100,31 @@ public class ExifToolTest {
 
     @Test
     public void setTags() throws ExiftoolException, URISyntaxException, IOException {
-        final URI source = ExifToolTest.class.getResource("/bin/Picture_600x400.jpg").toURI();
-
-        final String location = copyToTemp(source);
+        final String location = copyToTemp(ExifToolTest.class.getResource(TEST_PICTURE).toURI());
         final ImmutableMap.Builder<SupportedTag, Object> builder = ImmutableMap.builder();
 
         Arrays.stream(SupportedTag.values()).forEach(tag -> builder.put(tag, TestUtil.randomString(150, true)));
 
-        final JsonNode jsonNode = exifTool.setTags(location, builder.build());
+        final Map<SupportedTag, Object> tagMap = builder.build();
 
-        LOG.info("updated jsonNode: {}", jsonNode);
+        final JsonNode jsonNode = exifTool.setTags(location, tagMap);
 
+//        Set<Object> possibleMutations = new HashSet<>();
+
+        Arrays.stream(KnownProfile.values()).forEach(profile -> {
+            LOG.info("========= {} ==========", profile);
+            exifTool.getEntriesForProfile(exifTool.getObjectNode(jsonNode, 0), profile).forEach((key, value) -> {
+                LOG.debug("{}: {}", key, value);
+                /*if (!tagMap.values().contains(value)) {
+                    possibleMutations.add(value);
+                }*/
+            });
+        });
+
+        /* sigh. To write a test for this is hard :'( */
+        /*if (!possibleMutations.isEmpty()) {
+            fail("expected no mutations, but got " + possibleMutations);
+        }*/
     }
 
     private String copyToTemp(URI source) throws IOException {

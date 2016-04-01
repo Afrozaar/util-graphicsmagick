@@ -1,7 +1,5 @@
 package com.afrozaar.util.graphicsmagick.exiftool;
 
-import static java.lang.String.format;
-
 import com.afrozaar.util.graphicsmagick.exiftool.AbstractJsonResponseConsumer.Builder;
 
 import com.google.common.collect.ImmutableMap;
@@ -26,15 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ExifTool implements IExifTool {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExifTool.class);
     private ObjectMapper objectMapper = new ObjectMapper();
-
-    private final Function<Map.Entry, String> tagString = entry -> format("%s=%s", entry.getKey(), entry.getValue());
 
     @Override
     public JsonNode getTags(final String... fileLocations) throws ExiftoolException {
@@ -96,6 +91,11 @@ public class ExifTool implements IExifTool {
         final ImmutableMap.Builder<String, Object> map = ImmutableMap.builder();
         profileNode.fields().forEachRemaining(entry -> map.put(entry.getKey(), entry.getValue()));
         return map.build();
+    }
+
+    @Override
+    public ObjectNode getObjectNode(JsonNode node, int index) {
+        return (ObjectNode) (node.isArray() ? node.get(index) : node);
     }
 
     @Override

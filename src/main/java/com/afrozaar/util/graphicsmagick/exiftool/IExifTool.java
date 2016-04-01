@@ -18,5 +18,7 @@ public interface IExifTool {
 
     Map<String, Object> getEntriesForProfile(ObjectNode node, KnownProfile profile);
 
+    ObjectNode getObjectNode(JsonNode node, int index);
+
     JsonNode setTags(String fileLocation, Map<SupportedTag, Object> tagMap) throws ExiftoolException;
 }
