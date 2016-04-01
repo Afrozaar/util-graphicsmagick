@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import com.afrozaar.util.graphicsmagick.exiftool.ExifTool;
 import com.afrozaar.util.graphicsmagick.exiftool.ExiftoolException;
 import com.afrozaar.util.graphicsmagick.exiftool.KnownProfile;
+import com.afrozaar.util.graphicsmagick.exiftool.SupportedTag;
 import com.afrozaar.util.test.TestUtil;
 
 import com.google.common.collect.ImmutableMap;
@@ -100,15 +101,12 @@ public class ExifToolTest {
         final String artist = "some-artist";
         final String sourceS = "hot-off-the-press";
 
-        final ImmutableMap.Builder<String, Object> builder = ImmutableMap.<String, Object>builder()
-                .put("Creator", artist)
-                .put("usercomment", copyright)
-                .put("copyright", copyright)
-                .put("rights", copyright)
-                .put("copyrightnotice", copyright)
-                .put("source", sourceS)
-                .put("credit", sourceS)
-                ;
+        final ImmutableMap.Builder<SupportedTag, Object> builder = ImmutableMap.<SupportedTag, Object>builder()
+                .put(SupportedTag.Creator, artist)
+                .put(SupportedTag.Description, copyright)
+                .put(SupportedTag.Rights, copyright)
+                .put(SupportedTag.Source, sourceS)
+                .put(SupportedTag.Credit, sourceS);
 
         final JsonNode jsonNode = exifTool.setTags(location, builder.build());
 
