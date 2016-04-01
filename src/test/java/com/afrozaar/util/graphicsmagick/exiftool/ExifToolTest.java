@@ -1,13 +1,9 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.exiftool;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.junit.Assert.fail;
 
-import com.afrozaar.util.graphicsmagick.exiftool.ExifTool;
-import com.afrozaar.util.graphicsmagick.exiftool.ExiftoolException;
-import com.afrozaar.util.graphicsmagick.exiftool.KnownProfile;
-import com.afrozaar.util.graphicsmagick.exiftool.SupportedTag;
 import com.afrozaar.util.test.TestUtil;
 
 import com.google.common.collect.ImmutableMap;
