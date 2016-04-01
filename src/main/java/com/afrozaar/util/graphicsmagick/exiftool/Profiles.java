@@ -64,7 +64,7 @@ public class Profiles {
 
         File = aProfile("File")
                 .withTag(SupportedTag.Description, "Comment")
-                .withTag(SupportedTag.Creator, "Artist")
+                .withTag(SupportedTag.Creator, "Creator")
                 .withTag(SupportedTag.Rights, "Copyright")
                 .build();
     }
