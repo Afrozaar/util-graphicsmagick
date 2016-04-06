@@ -23,6 +23,16 @@ public abstract class AbstractImageIO implements IImageService {
     private String tempDirProperty;
     private boolean tempDirSet;
 
+    public AbstractImageIO() {
+        super();
+    }
+
+    public AbstractImageIO(String tempDir) {
+        super();
+        this.tempDir = tempDir;
+        createTempDir(tempDir);
+    }
+
     @Value("${tempDir}")
     public void setTempDir(String tempDir) {
         this.tempDirProperty = tempDir;
@@ -36,10 +46,14 @@ public abstract class AbstractImageIO implements IImageService {
         } else {
             this.tempDir = System.getProperty("java.io.tmpdir") + "/media";
         }
+        createTempDir(tempDir);
+    }
 
+    public void createTempDir(String tempDir) {
         final File dir = new File(tempDir);
         if (!dir.exists() && !dir.mkdirs()) {
-            throw new RuntimeException(String.format("AbstractImageIO could not prepare the tempDir (Directory did not exist, and could not be created). tempDir=%s", this.tempDir));
+            throw new RuntimeException(
+                    String.format("AbstractImageIO could not prepare the tempDir (Directory did not exist, and could not be created). tempDir=%s", this.tempDir));
         }
     }
 

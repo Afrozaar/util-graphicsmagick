@@ -31,6 +31,14 @@ import java.util.Optional;
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
 
+    public GraphicsMagicImageIO() {
+        super();
+    }
+
+    public GraphicsMagicImageIO(String tempDir) {
+        super(tempDir);
+    }
+
     private static final String COMMAND_CONVERT = "convert";
     private static final String COMMAND_IDENTIFY = "identify";
     private GMService service = new PooledGMService(new GMConnectionPoolConfig());
