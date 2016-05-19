@@ -123,14 +123,16 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             name = tempImageLoc;
         }
 
-        if (suffix == null) {
-            suffix = tempSuffix;
-        }
-        if (!Strings.isNullOrEmpty(suffix) && !suffix.startsWith(".")) {
-            suffix = "." + suffix;
-        }
+        return format("%s_resize%d%s", name, random.nextInt(3), normaliseSuffix0(suffix, tempSuffix));
+    }
 
-        return format("%s_resize%d%s", name, random.nextInt(3), (suffix == null ? "" : suffix));
+    private String normaliseSuffix0(String suffix, String tempSuffix) {
+        final String suffixOrTempSuffix = Optional.ofNullable(suffix).orElse(tempSuffix);
+        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".")
+                ? "." + suffixOrTempSuffix
+                : suffixOrTempSuffix;
+
+        return Optional.ofNullable(prependedOrNull).orElse("").toLowerCase();
     }
 
     @Override

@@ -64,7 +64,7 @@ public abstract class AbstractImageIO implements IImageService {
 
     protected String getTempFileName(String sourceName) {
         String suffix = getExtension(sourceName);
-        return tempDir + File.separator + "resource_" + getRandomAlpha(5) + (suffix == null ? "" : suffix);
+        return tempDir + File.separator + "resource_" + getRandomAlpha(5) + (suffix == null ? "" : suffix.toLowerCase());
     }
 
     protected String getExtension(String imageName) {
