@@ -7,6 +7,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 
 import org.gm4java.engine.GMException;
@@ -199,15 +200,17 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException {
+        final String sourceNameToUse = Optional.ofNullable(sourceName).orElse(getRandomAlpha(10));
+
         FileOutputStream output = null;
-        if (sourceName == null) {
-            sourceName = getRandomAlpha(10);
-        }
+        final FileSystemResource resource = FileCleanup.withCleanup(getTempFileName(sourceNameToUse));
         try {
-            File file = new File(getTempFileName(sourceName));
-            output = new FileOutputStream(file);
+            output = new FileOutputStream(resource.getFile());
             findSimpleResource.copyTo(output);
-            return file.getAbsolutePath();
+            return resource.getFile().getAbsolutePath();
+        } catch (IOException e) {
+            FileCleanup.cleanup(resource.getFile());
+            throw e;
         } finally {
             if (output != null) {
                 output.close();
