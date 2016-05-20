@@ -203,13 +203,14 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         final String sourceNameToUse = Optional.ofNullable(sourceName).orElse(getRandomAlpha(10));
 
         FileOutputStream output = null;
-        final FileSystemResource resource = FileCleanup.withCleanup(getTempFileName(sourceNameToUse));
+        final String tempFileName = getTempFileName(sourceNameToUse);
         try {
-            output = new FileOutputStream(resource.getFile());
+            File file = new File(tempFileName);
+            output = new FileOutputStream(file);
             findSimpleResource.copyTo(output);
-            return resource.getFile().getAbsolutePath();
+            return file.getAbsolutePath();
         } catch (IOException e) {
-            FileCleanup.cleanup(resource.getFile());
+            FileCleanup.withCleanup(tempFileName);
             throw e;
         } finally {
             if (output != null) {
