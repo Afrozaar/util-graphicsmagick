@@ -2,23 +2,6 @@ package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteSource;
-
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.stereotype.Component;
-
-import org.gm4java.engine.GMException;
-import org.gm4java.engine.GMService;
-import org.gm4java.engine.GMServiceException;
-import org.gm4java.engine.support.GMConnectionPoolConfig;
-import org.gm4java.engine.support.PooledGMService;
-import org.gm4java.im4java.GMBatchCommand;
-import org.im4java.core.IM4JavaException;
-import org.im4java.core.IMOperation;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +11,21 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.gm4java.engine.GMException;
+import org.gm4java.engine.GMService;
+import org.gm4java.engine.GMServiceException;
+import org.gm4java.engine.support.GMConnectionPoolConfig;
+import org.gm4java.engine.support.PooledGMService;
+import org.gm4java.im4java.GMBatchCommand;
+import org.im4java.core.IM4JavaException;
+import org.im4java.core.IMOperation;
+import org.springframework.stereotype.Component;
+
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
 
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
@@ -60,6 +58,11 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         public int getY() {
             return y;
         }
+
+        @Override
+        public String toString() {
+            return "[" + x + "x" + y + "]";
+        }
     }
 
     @Override
@@ -89,6 +92,10 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
+        return crop(templateImageLoc, size, offsets, Optional.of(resizeXY), newSuffix);
+    }
+
+    public String crop(String templateImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix) throws IOException {
         GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
 
         IMOperation op = new IMOperation();
@@ -97,9 +104,10 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
         op.colorspace("rgb");
         op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
-        if (resizeXY != null) {
-            op.resize(resizeXY.getX(), resizeXY.getY(), ">");
-        }
+        
+        resizeXY.ifPresent(xy -> {
+            op.resize(xy.getX(), xy.getY(), ">");
+        });
 
         String outputFileName = getOutputFileName(templateImageLoc, newSuffix);
         op.addImage(outputFileName);
@@ -129,9 +137,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     private String normaliseSuffix0(String suffix, String tempSuffix) {
         final String suffixOrTempSuffix = Optional.ofNullable(suffix).orElse(tempSuffix);
-        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".")
-                ? "." + suffixOrTempSuffix
-                : suffixOrTempSuffix;
+        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".") ? "." + suffixOrTempSuffix : suffixOrTempSuffix;
 
         return Optional.ofNullable(prependedOrNull).orElse("").toLowerCase();
     }
