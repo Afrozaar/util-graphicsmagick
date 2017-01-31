@@ -2,8 +2,6 @@ package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
 
-import com.afrozaar.util.java8.AfrozaarCollectors;
-
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -28,7 +26,9 @@ import java.io.InputStream;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
@@ -168,7 +168,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             Map<String, String> split = Arrays.stream(execute.split("\n")).filter(x -> x.contains("=")).map(x -> {
                 String[] keyValue = x.split("=");
                 return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
-            }).collect(AfrozaarCollectors.toMap());
+            }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
             int width = Integer.parseInt(split.get("width"));
             int height = Integer.parseInt(split.get("height"));
