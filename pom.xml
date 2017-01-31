@@ -7,7 +7,7 @@
     </parent>
     <artifactId>util-graphicsmagick</artifactId>
     <name>GraphicsMagic Util</name>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
 
     <properties>
         <target>1.8</target>
