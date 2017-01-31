@@ -2,15 +2,13 @@ package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import com.afrozaar.util.java8.AfrozaarCollectors;
+
+import org.springframework.stereotype.Component;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteSource;
 
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
@@ -20,12 +18,17 @@ import org.gm4java.engine.support.PooledGMService;
 import org.gm4java.im4java.GMBatchCommand;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
-import org.springframework.stereotype.Component;
 
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteSource;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class GraphicsMagicImageIO extends AbstractImageIO {
@@ -104,7 +107,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
         op.colorspace("rgb");
         op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
-        
+
         resizeXY.ifPresent(xy -> {
             op.resize(xy.getX(), xy.getY(), ">");
         });
@@ -137,7 +140,8 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     private String normaliseSuffix0(String suffix, String tempSuffix) {
         final String suffixOrTempSuffix = Optional.ofNullable(suffix).orElse(tempSuffix);
-        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".") ? "." + suffixOrTempSuffix : suffixOrTempSuffix;
+        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".") ? "." + suffixOrTempSuffix
+                : suffixOrTempSuffix;
 
         return Optional.ofNullable(prependedOrNull).orElse("").toLowerCase();
     }
@@ -158,23 +162,27 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
             LOG.debug("identify on {}", tempImageLoc);
-            String execute = service.execute(COMMAND_IDENTIFY, "-format", "%w\\n%h\\n%m\\n%t\\n", tempImageLoc);
+            String execute = service.execute(COMMAND_IDENTIFY, "-format", "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n", tempImageLoc);
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
-            List<String> split = Splitter.on('\n').trimResults().splitToList(execute);
-            int width = Integer.parseInt(split.get(0));
-            int height = Integer.parseInt(split.get(1));
+            Map<String, String> split = Arrays.stream(execute.split("\n")).filter(x -> x.contains("=")).map(x -> {
+                String[] keyValue = x.split("=");
+                return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
+            }).collect(AfrozaarCollectors.toMap());
 
-            String group = split.get(2);
+            int width = Integer.parseInt(split.get("width"));
+            int height = Integer.parseInt(split.get("height"));
+
+            String type = split.get("type");
             String mimeType = "unknown";
-            if (group != null) {
-                if ("ps".equals(group.toLowerCase())) {
+            if (type != null) {
+                if ("ps".equals(type.toLowerCase())) {
                     mimeType = "application/postscript";
                 } else {
-                    mimeType = "image/" + group.toLowerCase();
+                    mimeType = "image/" + type.toLowerCase();
                 }
             }
-            String topName = split.get(3);
+            String topName = split.get("name");
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);
             if (includeMeta) {
