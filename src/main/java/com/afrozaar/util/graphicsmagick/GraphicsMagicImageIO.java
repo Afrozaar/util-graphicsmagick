@@ -69,7 +69,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(final String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix) throws IOException {
+    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix) throws IOException {
         GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
 
         IMOperation op = new IMOperation();
