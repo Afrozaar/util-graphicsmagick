@@ -7,10 +7,32 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.util.Objects;
 
 public class FileCleanup {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCleanup.class);
+
+    private static final ReferenceQueue<FileSystemResource> referenceQueue = new ReferenceQueue<>();
+
+    static {
+
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    Reference<? extends FileSystemResource> remove = referenceQueue.remove(0);
+                    System.out.println("deleting file after phantom reference");
+                    delete(remove.get().getFile());
+                } catch (IllegalArgumentException | InterruptedException e) {
+                    LOG.error("error deleting file ", e);
+                }
+            }
+        });
+        thread.start();
+
+    }
 
     public static void cleanup(File file) {
         delete(file);
@@ -20,7 +42,7 @@ public class FileCleanup {
         Objects.requireNonNull(file, "Can not delete null file.");
         try {
             if (file.exists()) {
-                LOG.trace("deleting {}", file);
+                LOG.info("deleting {}", file);
                 FileUtils.forceDelete(file);
             }
         } catch (IOException e) {
@@ -29,10 +51,8 @@ public class FileCleanup {
     }
 
     public static void cleanup(FileSystemResource resource) {
-        WeakReferenceMonitor.monitor(resource, () -> {
-            LOG.trace("released {}", resource.getFile());
-            cleanup(resource.getFile());
-        });
+        LOG.info("creating phantom reference");
+        new PhantomReference<>(resource, referenceQueue);
     }
 
     public static FileSystemResource withCleanup(FileSystemResource fileSystemResource) {
