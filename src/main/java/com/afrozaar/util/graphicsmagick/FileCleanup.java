@@ -1,7 +1,8 @@
 package com.afrozaar.util.graphicsmagick;
 
+import static java.util.Optional.ofNullable;
+
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.util.WeakReferenceMonitor;
 
 import org.apache.commons.io.FileUtils;
 
@@ -23,8 +24,8 @@ public class FileCleanup {
             while (true) {
                 try {
                     Reference<? extends FileSystemResource> remove = referenceQueue.remove(0);
-                    System.out.println("deleting file after phantom reference");
-                    delete(remove.get().getFile());
+                    LOG.debug("Deleting file after phantom reference: {}", remove);
+                    ofNullable(remove.get()).ifPresent(reference -> delete(reference.getFile()));
                 } catch (IllegalArgumentException | InterruptedException e) {
                     LOG.error("error deleting file ", e);
                 }

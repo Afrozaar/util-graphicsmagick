@@ -2,11 +2,11 @@ package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
 
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
+
+import org.springframework.stereotype.Component;
 
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
@@ -165,10 +165,12 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             String execute = service.execute(COMMAND_IDENTIFY, "-format", "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n", tempImageLoc);
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
-            Map<String, String> split = Arrays.stream(execute.split("\n")).filter(x -> x.contains("=")).map(x -> {
+            String[] split2 = execute.split("\n");
+            LOG.debug("result from gm: {}", Arrays.asList(split2));
+            Map<String, String> split = Arrays.stream(split2).filter(x -> x.contains("=")).map(x -> {
                 String[] keyValue = x.split("=");
                 return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
-            }).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+            }).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> a)); // when calling info on gifs we get width and height per image, all the widths and heights are going to be the same
 
             int width = Integer.parseInt(split.get("width"));
             int height = Integer.parseInt(split.get("height"));

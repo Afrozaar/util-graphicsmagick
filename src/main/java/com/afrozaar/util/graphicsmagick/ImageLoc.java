@@ -1,5 +1,7 @@
 package com.afrozaar.util.graphicsmagick;
 
+import com.google.common.base.Preconditions;
+
 import javax.validation.constraints.NotNull;
 
 import java.io.Externalizable;
@@ -24,15 +26,10 @@ public class ImageLoc implements Externalizable {
 
     public ImageLoc(@NotNull String imageUrl, @NotNull String publicLocationPrefix, @NotNull String sourceUrl) {
         super();
-        if (imageUrl == null) {
-            throw new NullPointerException("image url cannot be null");
-        }
-        if (publicLocationPrefix == null) {
-            throw new NullPointerException("publicLocation cannot be null");
-        }
-        if (sourceUrl == null) {
-            throw new NullPointerException("sourceUrl url cannot be null");
-        }
+        Preconditions.checkNotNull(imageUrl, "imageUrl cannot be null");
+        Preconditions.checkNotNull(publicLocationPrefix, "publicLocation cannot be null");
+        Preconditions.checkNotNull(sourceUrl, "sourceUrl cannot be null");
+
         this.imageUrl = imageUrl;
         this.publicLocationPrefix = publicLocationPrefix;
         this.sourceUrl = sourceUrl;
