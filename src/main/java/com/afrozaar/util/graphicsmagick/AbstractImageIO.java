@@ -1,5 +1,7 @@
 package com.afrozaar.util.graphicsmagick;
 
+import static java.lang.String.format;
+
 import com.google.common.io.ByteSource;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -44,7 +46,7 @@ public abstract class AbstractImageIO implements IImageService {
         if (tempDirSet && tempDirProperty != null && !tempDirProperty.equals("${tempDir}")) {
             this.tempDir = tempDirProperty;
         } else {
-            this.tempDir = System.getProperty("java.io.tmpdir") + "/media";
+            this.tempDir = format("%s/media", System.getProperty("java.io.tmpdir"));
         }
         createTempDir(tempDir);
     }
@@ -52,8 +54,7 @@ public abstract class AbstractImageIO implements IImageService {
     public void createTempDir(String tempDir) {
         final File dir = new File(tempDir);
         if (!dir.exists() && !dir.mkdirs()) {
-            throw new RuntimeException(
-                    String.format("AbstractImageIO could not prepare the tempDir (Directory did not exist, and could not be created). tempDir=%s", this.tempDir));
+            throw new RuntimeException(format("AbstractImageIO could not prepare the tempDir (Directory did not exist, and could not be created). tempDir=%s", this.tempDir));
         }
     }
 

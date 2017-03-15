@@ -2,11 +2,11 @@ package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
 
-import org.springframework.stereotype.Component;
-
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
+
+import org.springframework.stereotype.Component;
 
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
@@ -166,7 +166,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
             String[] split2 = execute.split("\n");
-            LOG.debug("resuilt from gm: {}", split2);
+            LOG.debug("result from gm: {}", Arrays.asList(split2));
             Map<String, String> split = Arrays.stream(split2).filter(x -> x.contains("=")).map(x -> {
                 String[] keyValue = x.split("=");
                 return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
