@@ -1,6 +1,7 @@
 package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -17,6 +18,8 @@ import org.gm4java.im4java.GMBatchCommand;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 
+import javax.annotation.Nullable;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +31,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -43,6 +47,8 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     private static final String COMMAND_CONVERT = "convert";
     private static final String COMMAND_IDENTIFY = "identify";
+    private static final Map<String, String> POSTSCRIPT_MIME_MAP = ImmutableMap.of("ps", "application/postscript", "pdf", "application/pdf");
+
     private GMService service = new PooledGMService(new GMConnectionPoolConfig());
 
     public static class XY {
@@ -70,9 +76,13 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix) throws IOException {
-        GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
+        final GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
+        final IMOperation op = new IMOperation();
 
-        IMOperation op = new IMOperation();
+        final ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
+            op.density(300);
+        }
 
         op.addImage(tempImageLoc);
 
@@ -103,14 +113,17 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
         IMOperation op = new IMOperation();
 
+        final ImageInfo imageInfo = getImageInfo(templateImageLoc, false, null);
+        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
+            op.density(300);
+        }
+
         op.addImage(templateImageLoc);
 
         op.colorspace("rgb");
         op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
 
-        resizeXY.ifPresent(xy -> {
-            op.resize(xy.getX(), xy.getY(), ">");
-        });
+        resizeXY.ifPresent(xy -> op.resize(xy.getX(), xy.getY(), ">"));
 
         String outputFileName = getOutputFileName(templateImageLoc, newSuffix);
         op.addImage(outputFileName);
@@ -126,24 +139,22 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         }
     }
 
-    private String getOutputFileName(String tempImageLoc, String suffix) {
+    private String getOutputFileName(String tempImageLoc, @Nullable String suffix) {
         String tempSuffix = getExtension(tempImageLoc);
-        final String name;
-        if (tempSuffix != null) {
-            name = tempImageLoc.substring(0, tempImageLoc.indexOf(tempSuffix) - 1);
-        } else {
-            name = tempImageLoc;
-        }
+        final String name = ofNullable(tempSuffix)
+                .map(ts -> tempImageLoc.substring(0, tempImageLoc.indexOf(ts) - 1))
+                .orElse(tempImageLoc);
 
-        return format("%s_resize%d%s", name, random.nextInt(3), normaliseSuffix0(suffix, tempSuffix));
+        return format("%s_resize%d%s", name, random.nextInt(3), normaliseSuffix0(tempSuffix, suffix));
     }
 
-    private String normaliseSuffix0(String suffix, String tempSuffix) {
-        final String suffixOrTempSuffix = Optional.ofNullable(suffix).orElse(tempSuffix);
-        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".") ? "." + suffixOrTempSuffix
+    private String normaliseSuffix0(String tempSuffix, @Nullable String suffix) {
+        final String suffixOrTempSuffix = ofNullable(suffix).orElse(tempSuffix);
+        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".")
+                ? "." + suffixOrTempSuffix
                 : suffixOrTempSuffix;
 
-        return Optional.ofNullable(prependedOrNull).orElse("").toLowerCase();
+        return ofNullable(prependedOrNull).orElse("").toLowerCase();
     }
 
     @Override
@@ -159,6 +170,8 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException {
+        final Function<String, String> postscriptMimeResolver = type -> POSTSCRIPT_MIME_MAP.get(type.toLowerCase());
+
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
             LOG.debug("identify on {}", tempImageLoc);
@@ -172,19 +185,11 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
                 return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
             }).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> a)); // when calling info on gifs we get width and height per image, all the widths and heights are going to be the same
 
-            int width = Integer.parseInt(split.get("width"));
-            int height = Integer.parseInt(split.get("height"));
+            final int width = Integer.parseInt(split.get("width"));
+            final int height = Integer.parseInt(split.get("height"));
 
-            String type = split.get("type");
-            String mimeType = "unknown";
-            if (type != null) {
-                if ("ps".equals(type.toLowerCase())) {
-                    mimeType = "application/postscript";
-                } else {
-                    mimeType = "image/" + type.toLowerCase();
-                }
-            }
-            String topName = split.get("name");
+            final String mimeType = ofNullable(split.get("type")).map(postscriptMimeResolver).orElse("unknown");
+            final String topName = split.get("name");
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);
             if (includeMeta) {
@@ -216,7 +221,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException {
-        final String sourceNameToUse = Optional.ofNullable(sourceName).orElse(getRandomAlpha(10));
+        final String sourceNameToUse = ofNullable(sourceName).orElse(getRandomAlpha(10));
 
         FileOutputStream output = null;
         final String tempFileName = getTempFileName(sourceNameToUse);
