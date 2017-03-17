@@ -47,9 +47,17 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     private static final String COMMAND_CONVERT = "convert";
     private static final String COMMAND_IDENTIFY = "identify";
-    private static final Map<String, String> POSTSCRIPT_MIME_MAP = ImmutableMap.of("ps", "application/postscript", "pdf", "application/pdf");
+    private static final Map<String, String> MIME_TYPE_MAP = ImmutableMap.<String, String>builder()
+            .put("ps", "application/postscript")
+            .put("pdf", "application/pdf")
+            .put("jpg", "image/jpeg")
+            .put("jpeg", "image/jpeg")
+            .put("gif", "image/gif")
+            .put("tiff", "image/tiff")
+            .build();
 
     private GMService service = new PooledGMService(new GMConnectionPoolConfig());
+    private MimeService mimeService = new MimeService();
 
     public static class XY {
         private int x;
@@ -168,10 +176,21 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         };
     }
 
+    /**
+     * Function producer that takes a resourceUri to fall back to when a type can not be resolved from {@link #MIME_TYPE_MAP}.
+     * The produced function takes a type:String input to retrieve from the {@link #MIME_TYPE_MAP}.
+     */
+    private final Function<String, Function<String, String>> MIME_TYPE_RESOLVER = resourceUri -> type -> ofNullable(MIME_TYPE_MAP.get(type.toLowerCase()))
+            .orElseGet(() -> {
+                try {
+                    return mimeService.getMimeType(resourceUri);
+                } catch (IOException e) {
+                    return format("image/%s", type.toLowerCase());
+                }
+            });
+
     @Override
     public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException {
-        final Function<String, String> postscriptMimeResolver = type -> POSTSCRIPT_MIME_MAP.get(type.toLowerCase());
-
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
             LOG.debug("identify on {}", tempImageLoc);
@@ -188,7 +207,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             final int width = Integer.parseInt(split.get("width"));
             final int height = Integer.parseInt(split.get("height"));
 
-            final String mimeType = ofNullable(split.get("type")).map(postscriptMimeResolver).orElse("unknown");
+            final String mimeType = ofNullable(split.get("type")).map(MIME_TYPE_RESOLVER.apply(tempImageLoc)).orElse("unknown");
             final String topName = split.get("name");
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);
