@@ -1,6 +1,7 @@
 package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 import com.google.common.io.ByteSource;
 
@@ -64,8 +65,8 @@ public abstract class AbstractImageIO implements IImageService {
     }
 
     protected String getTempFileName(String sourceName) {
-        String suffix = getExtension(sourceName);
-        return tempDir + File.separator + "resource_" + getRandomAlpha(5) + (suffix == null ? "" : suffix.toLowerCase());
+        String suffix = ofNullable(getExtension(sourceName)).map(String::toLowerCase).orElse("");
+        return format("%s%sresource_%s%s", tempDir, File.separator, getRandomAlpha(5), suffix) ;
     }
 
     protected String getExtension(String imageName) {
