@@ -6,6 +6,7 @@ import com.google.common.io.ByteSource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,7 @@ public class MimeService implements IMimeService {
                     public InputStream openStream() throws IOException {
                         return process.getInputStream();
                     }
-                }.read());
+                }.read(), StandardCharsets.UTF_8);
                 return output.split(":")[1].split(";")[0].trim();
             } else {
 
@@ -41,7 +42,7 @@ public class MimeService implements IMimeService {
                     public InputStream openStream() throws IOException {
                         return process.getErrorStream();
                     }
-                }.read());
+                }.read(), StandardCharsets.UTF_8);
 
                 throw new IOException(format("Failed to determine MIME Type from %s (errout: %s)", uri, error));
             }
