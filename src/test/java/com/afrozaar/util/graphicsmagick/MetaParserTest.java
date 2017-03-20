@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ public class MetaParserTest {
     public void parseResult() throws Exception {
         final String context = "/imageinfo.txt";
         final Optional<Map<String, Object>> stringObjectMap = MetaParser.parseResult(readOutput(context));
+        LOG.info("Parsed object map: {}", stringObjectMap);
     }
 
     @Test
@@ -39,7 +41,7 @@ public class MetaParserTest {
     }
 
     @Test
-    public void ParseWeirdIndents() throws IOException {
+    public void parseWeirdIndents() throws IOException {
         final String context = "/rugbymetadata.txt";
         final Optional<Map<String, Object>> result = MetaParser.parseResult(readOutput(context));
 
@@ -52,7 +54,7 @@ public class MetaParserTest {
     }
 
     @Test
-    public void RogueLineData() {
+    public void rogueLineData() {
 
         final String input = "this or. that";
         final String input2 = "Profile-1";
@@ -67,6 +69,6 @@ public class MetaParserTest {
             public InputStream openStream() throws IOException {
                 return MetaParserTest.class.getResourceAsStream(context);
             }
-        }.read());
+        }.read(), StandardCharsets.UTF_8);
     }
 }

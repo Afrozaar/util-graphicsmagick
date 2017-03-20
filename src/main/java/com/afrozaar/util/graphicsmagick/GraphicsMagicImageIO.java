@@ -261,7 +261,10 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public void cleanup(String downloadResource) {
-        new File(downloadResource).delete();
+        final File fileToDelete = new File(downloadResource);
+        if (fileToDelete.exists() && !fileToDelete.delete()) {
+            LOG.warn("Could not clean up existing file: {}", fileToDelete);
+        }
     }
 
 }
