@@ -75,7 +75,14 @@ public abstract class AbstractImageIO implements IImageService {
         }
         int indexOf = imageName.lastIndexOf(".");
         if (indexOf != -1) {
-            return imageName.substring(indexOf);
+            final String substring = imageName.substring(indexOf);
+            if (substring.contains("?")) {
+                return substring.substring(0, substring.indexOf("?"));
+            }
+            if (substring.toLowerCase().contains("%3f")) {
+                return substring.substring(0, substring.toLowerCase().indexOf("%3f"));
+            }
+            return substring;
         } else {
             return null;
         }
