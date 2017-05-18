@@ -92,6 +92,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             op.density(300);
         }
 
+        op.strip();
         op.addImage(tempImageLoc);
 
         op.colorspace("rgb");
@@ -126,6 +127,7 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             op.density(300);
         }
 
+        op.strip();
         op.addImage(templateImageLoc);
 
         op.colorspace("rgb");
