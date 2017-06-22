@@ -84,18 +84,14 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix) throws IOException {
+        return resize(tempImageLoc, maximumWidth, maximumHeight, newSuffix, null);
+    }
+
+    @Override
+    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix, Double imageQuality) throws IOException {
         final GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
-        final IMOperation op = new IMOperation();
 
-        final ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
-        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
-            op.density(300);
-        }
-
-        op.strip();
-        op.addImage(tempImageLoc);
-
-        op.colorspace("rgb");
+        IMOperation op = createImOperation(tempImageLoc, imageQuality);
         op.resize(maximumWidth, maximumHeight, ">");
 
         final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
@@ -114,28 +110,22 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
 
     @Override
     public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
-        return crop(templateImageLoc, size, offsets, Optional.of(resizeXY), newSuffix);
+        return crop(templateImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, null);
     }
 
-    public String crop(String templateImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix) throws IOException {
+    @Override
+    public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix, Double imageQuality) throws IOException {
+        return crop(templateImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, imageQuality);
+    }
+
+    public String crop(String tempImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix, Double imageQuality) throws IOException {
         GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
 
-        IMOperation op = new IMOperation();
-
-        final ImageInfo imageInfo = getImageInfo(templateImageLoc, false, null);
-        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
-            op.density(300);
-        }
-
-        op.strip();
-        op.addImage(templateImageLoc);
-
-        op.colorspace("rgb");
+        IMOperation op = createImOperation(tempImageLoc, imageQuality);
         op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
-
         resizeXY.ifPresent(xy -> op.resize(xy.getX(), xy.getY(), ">"));
 
-        String outputFileName = getOutputFileName(templateImageLoc, newSuffix);
+        String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
         op.addImage(outputFileName);
 
         // execute the operation
@@ -147,6 +137,23 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         } catch (InterruptedException | IM4JavaException e) {
             throw new GraphicsMagickException(outputFileName, e.getMessage(), e);
         }
+    }
+
+    private IMOperation createImOperation(String tempImageLoc, Double imageQuality) throws IOException {
+        IMOperation op = new IMOperation();
+
+        final ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
+            op.density(300);
+        }
+
+        op.strip();
+        op.addImage(tempImageLoc);
+        if (imageQuality != null) {
+            op.quality(imageQuality);
+        }
+        op.colorspace("rgb");
+        return op;
     }
 
     private String getOutputFileName(String tempImageLoc, @Nullable String suffix) {
