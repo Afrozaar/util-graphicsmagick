@@ -109,13 +109,17 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
-        return crop(templateImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, null);
+    public String crop(String tempImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
+        return crop(tempImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, null);
     }
 
     @Override
-    public String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix, Double imageQuality) throws IOException {
-        return crop(templateImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, imageQuality);
+    public String crop(String tempImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix, Double imageQuality) throws IOException {
+        return crop(tempImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, imageQuality);
+    }
+
+    public String crop(String tempImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix) throws IOException {
+        return crop(tempImageLoc, size, offsets, resizeXY, newSuffix, null);
     }
 
     public String crop(String tempImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix, Double imageQuality) throws IOException {
