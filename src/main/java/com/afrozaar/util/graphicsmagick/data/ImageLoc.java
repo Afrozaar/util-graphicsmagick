@@ -1,4 +1,4 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.data;
 
 import com.google.common.base.Preconditions;
 

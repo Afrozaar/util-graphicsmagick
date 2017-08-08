@@ -2,6 +2,7 @@ package com.afrozaar.util.graphicsmagick;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 import com.afrozaar.util.test.TestUtil;
 
 import org.junit.Test;

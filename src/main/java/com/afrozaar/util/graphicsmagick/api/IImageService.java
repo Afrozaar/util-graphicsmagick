@@ -1,6 +1,7 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.api;
 
-import com.afrozaar.util.graphicsmagick.GraphicsMagicImageIO.XY;
+import com.afrozaar.util.graphicsmagick.GraphicsMagickImageIO.XY;
+import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 
 import com.google.common.io.ByteSource;
 

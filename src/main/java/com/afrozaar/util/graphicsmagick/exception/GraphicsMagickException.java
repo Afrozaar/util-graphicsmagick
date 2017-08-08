@@ -1,4 +1,4 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.exception;
 
 import java.io.IOException;
 

@@ -2,6 +2,8 @@ package com.afrozaar.util.graphicsmagick;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.afrozaar.util.graphicsmagick.mime.MimeService;
+
 import org.springframework.core.io.ClassPathResource;
 
 import org.junit.Test;

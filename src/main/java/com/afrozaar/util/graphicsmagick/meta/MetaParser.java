@@ -1,4 +1,4 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.meta;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
