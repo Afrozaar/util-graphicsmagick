@@ -6,13 +6,15 @@ import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 
 import com.google.common.io.ByteSource;
 
+import javax.annotation.Nullable;
+
 import java.io.IOException;
 
 public interface IImageService {
 
-    String resize(String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix, Double imageQuality) throws IOException;
+    String resize(String tempImageLoc, int maximumHeight, int maximumWidth, @Nullable String newSuffix, @Nullable Double imageQuality) throws IOException;
 
-    String resize(String tempImageLoc, int maximumHeight, int maximumWidth, String newSuffix) throws IOException;
+    String resize(String tempImageLoc, int maximumHeight, int maximumWidth, @Nullable String newSuffix) throws IOException;
 
     String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException;
 

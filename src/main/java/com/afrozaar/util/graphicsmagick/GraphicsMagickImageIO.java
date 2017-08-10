@@ -32,6 +32,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
@@ -85,7 +87,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix, Double imageQuality) throws IOException {
+    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality) throws IOException {
         final GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
 
         IMOperation op = createImOperation(tempImageLoc, imageQuality);
@@ -96,9 +98,10 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
         // execute the operation
         try {
-            LOG.debug("running operation {}", op);
+            Long start = System.currentTimeMillis();
+            LOG.debug("running resize operation {}", op);
             command.run(op);
-            LOG.debug("op {} done", op);
+            LOG.debug("op resize {} done in {}", op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS));
             return outputFileName;
         } catch (InterruptedException | IM4JavaException e) {
             throw new IOException(e);
@@ -131,17 +134,23 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
         // execute the operation
         try {
-            LOG.debug("running operation {}", op);
+            Long start = System.currentTimeMillis();
+            LOG.debug("running crop operation {}", op);
             command.run(op);
-            LOG.debug("op {} done", op);
+            LOG.debug("op crop {} done in {}", op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS));
             return outputFileName;
         } catch (InterruptedException | IM4JavaException e) {
             throw new GraphicsMagickException(outputFileName, e.getMessage(), e);
         }
     }
 
-    private IMOperation createImOperation(String tempImageLoc, Double imageQuality) throws IOException {
+    private IMOperation createImOperation(String tempImageLoc, @Nullable Double imageQuality) throws IOException {
         IMOperation op = new IMOperation();
+        op.limit("memory").addRawArgs("256MB");
+        op.limit("map").addRawArgs("256MB");
+        //op.limit("area").addRawArgs("10MB");
+        op.limit("disk").addRawArgs("1GB");
+        //op.limit("thread").addRawArgs("2");
 
         final ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
