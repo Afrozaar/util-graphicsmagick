@@ -10,7 +10,7 @@ public interface IMimeService {
      */
     String getMimeType(String uri) throws IOException;
 
-    Function<String, String> resolveFor(String resourceUri);
+    Function<String, String> resolveFromBaseTypeOrInterrogate(String resourceUri);
 
     String suffixFromMimeType(String mimeType);
 

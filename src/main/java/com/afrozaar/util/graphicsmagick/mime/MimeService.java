@@ -5,47 +5,28 @@ import static java.util.Optional.ofNullable;
 
 import com.afrozaar.util.graphicsmagick.api.IMimeService;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public class MimeService implements IMimeService {
 
-    private static final Map<String, String> MIME_TYPE_MAP = ImmutableMap.<String, String>builder()
-            .put("ps", "application/postscript")
-            .put("pdf", "application/pdf")
-            .put("png", "image/png")
-            .put("jpg", "image/jpeg")
-            .put("jpeg", "image/jpeg")
-            .put("gif", "image/gif")
-            .put("tiff", "image/tiff")
-            .build();
-
-    /**
-     * Function producer that takes a resourceUri to fall back to when a type can not be resolved from {@link #MIME_TYPE_MAP}.
-     * The produced function takes a type:String input to retrieve from the {@link #MIME_TYPE_MAP}.
-     */
-    private final Function<String, Function<String, String>> MIME_TYPE_RESOLVER = resourceUri ->
-            type ->
-                    ofNullable(MIME_TYPE_MAP.get(type.toLowerCase()))
-                            .orElseGet(() -> {
-                                try {
-                                    return getMimeType(resourceUri);
-                                } catch (IOException e) {
-                                    return format("image/%s", type.toLowerCase());
-                                }
-                            });
-
     @Override
-    public Function<String, String> resolveFor(String resourceUri) {
-        return MIME_TYPE_RESOLVER.apply(resourceUri);
+    public Function<String, String> resolveFromBaseTypeOrInterrogate(String resourceUri) {
+        return type ->
+                ofNullable(MimeResolver.forExtension(type))
+                        .orElseGet(() -> {
+                            try {
+                                return getMimeType(resourceUri);
+                            } catch (IOException e) {
+                                return String.format("image/%s", type.toLowerCase());
+                            }
+                        });
     }
 
     /**
@@ -87,27 +68,15 @@ public class MimeService implements IMimeService {
         }
     }
 
-    // TODO: Use a bi-map for mime-extension-map and mime-type-map
-    private static final Map<String, String> MIME_EXTENSION_MAP = ImmutableMap.of(
-            "image/jpg", "jpg",
-            "image/png", "png",
-            "image/jpeg", "jpg",
-            "image/tiff", "tiff",
-            "image/gif", "gif"
-    );
-
     @Override
     public String suffixFromMimeType(String mimeType) {
-        return MIME_EXTENSION_MAP.get(mimeType);
+        return MimeResolver.forMime(mimeType);
     }
 
     @Override
     public String supportedMimeType(String mimeType) {
-
-        if (MIME_EXTENSION_MAP.get(mimeType) == null) {
-            return "image/png";
-        } else {
-            return mimeType;
-        }
+        return ofNullable(MimeResolver.forMime(mimeType))
+                .map(x -> mimeType)
+                .orElse("image/png");
     }
 }

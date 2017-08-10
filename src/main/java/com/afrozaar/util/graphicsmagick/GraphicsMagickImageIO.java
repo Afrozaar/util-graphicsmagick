@@ -3,6 +3,7 @@ package com.afrozaar.util.graphicsmagick;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
+import com.afrozaar.util.graphicsmagick.data.ImageInfo;
 import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
 import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 import com.afrozaar.util.graphicsmagick.meta.MetaParser;
@@ -189,8 +190,21 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException {
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
+            /**
+             * -----
+             * >$ identify -format "width=%w\nheight=%h\ntype=%m\nname=%t\n" maxi.jpg
+             * >width=1024
+             * >height=768
+             * >type=JPEG
+             * >name=maxi
+             * ----
+             *
+             * NOTE: type is not the full MIME format: &lt;base_type&gt;/&lt;subtype&gt;
+             */
+            final String IDENTIFY_FORMAT = "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n";
+
             LOG.debug("identify on {}", tempImageLoc);
-            String execute = service.execute(COMMAND_IDENTIFY, "-format", "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n", tempImageLoc);
+            String execute = service.execute(COMMAND_IDENTIFY, "-format", IDENTIFY_FORMAT, tempImageLoc);
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
             String[] split2 = execute.split("\n");
@@ -203,7 +217,9 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             final int width = Integer.parseInt(split.get("width"));
             final int height = Integer.parseInt(split.get("height"));
 
-            final String mimeType = ofNullable(split.get("type")).map(mimeService.resolveFor(tempImageLoc)).orElse("unknown");
+            final String mimeType = ofNullable(split.get("type"))
+                    .map(mimeService.resolveFromBaseTypeOrInterrogate(tempImageLoc))
+                    .orElse("unknown");
             final String topName = split.get("name");
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);

@@ -24,4 +24,23 @@ public class MimeServiceTest {
 
     }
 
+    @Test
+    public void checkSupportedMimeTypeTest() {
+        {
+            final String mimeType = mimeService.supportedMimeType("application/xml");
+
+            assertThat(mimeType).isEqualTo("image/png");
+        }
+        {
+            final String mimeType = mimeService.supportedMimeType("image/jpeg");
+
+            assertThat(mimeType).isEqualTo("image/jpeg");
+        }
+        {
+            final String mimeType = mimeService.supportedMimeType("application/pdf");
+
+            assertThat(mimeType).isEqualTo("application/pdf");
+        }
+    }
+
 }
