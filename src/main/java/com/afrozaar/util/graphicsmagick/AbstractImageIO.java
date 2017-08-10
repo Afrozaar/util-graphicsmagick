@@ -3,6 +3,8 @@ package com.afrozaar.util.graphicsmagick;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
+import com.afrozaar.util.graphicsmagick.api.IImageService;
+
 import com.google.common.io.ByteSource;
 
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.data;
 
 import com.google.common.base.Preconditions;
 
@@ -91,8 +91,13 @@ public class ImageLoc implements Externalizable {
 
     @Override
     public String toString() {
-        return "ImageLoc [imageUrl=" + imageUrl + ", publicLocation=" + getPublicLocation() + ", sourceUrl=" + sourceUrl + ", width=" + width + ", height=" + height
-                + ", mimeType=" + mimeType + "]";
+        return "ImageLoc{" + "imageUrl='" + imageUrl + '\'' +
+                ", publicLocationPrefix='" + publicLocationPrefix + '\'' +
+                ", sourceUrl='" + sourceUrl + '\'' +
+                ", width=" + width +
+                ", height=" + height +
+                ", mimeType='" + mimeType + '\'' +
+                '}';
     }
 
     public void setError(boolean error) {
@@ -101,15 +106,15 @@ public class ImageLoc implements Externalizable {
     }
 
     public String getPublicLocation() {
-        String separator;
-        if (publicLocationPrefix.endsWith("/") && imageUrl.startsWith("/")) {
+        final String SEPARATOR = "/";
+        if (publicLocationPrefix.endsWith(SEPARATOR) && imageUrl.startsWith(SEPARATOR)) {
             return publicLocationPrefix + imageUrl.substring(1);
-        } else if (publicLocationPrefix.endsWith("/")) {
+        } else if (publicLocationPrefix.endsWith(SEPARATOR)) {
             return publicLocationPrefix + imageUrl;
-        } else if (imageUrl.startsWith("/")) {
+        } else if (imageUrl.startsWith(SEPARATOR)) {
             return publicLocationPrefix + imageUrl;
         } else {
-            return publicLocationPrefix + "/" + imageUrl;
+            return publicLocationPrefix + SEPARATOR + imageUrl;
         }
     }
 

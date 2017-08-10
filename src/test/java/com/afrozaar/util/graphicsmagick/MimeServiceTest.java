@@ -2,6 +2,8 @@ package com.afrozaar.util.graphicsmagick;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.afrozaar.util.graphicsmagick.mime.MimeService;
+
 import org.springframework.core.io.ClassPathResource;
 
 import org.junit.Test;
@@ -20,6 +22,25 @@ public class MimeServiceTest {
             assertThat(mimeService.getMimeType(new ClassPathResource("/logback-test.xml").getFile().getAbsolutePath())).isEqualTo("text/plain");
         }
 
+    }
+
+    @Test
+    public void checkSupportedMimeTypeTest() {
+        {
+            final String mimeType = mimeService.supportedMimeType("application/xml");
+
+            assertThat(mimeType).isEqualTo("image/png");
+        }
+        {
+            final String mimeType = mimeService.supportedMimeType("image/jpeg");
+
+            assertThat(mimeType).isEqualTo("image/jpeg");
+        }
+        {
+            final String mimeType = mimeService.supportedMimeType("application/pdf");
+
+            assertThat(mimeType).isEqualTo("application/pdf");
+        }
     }
 
 }

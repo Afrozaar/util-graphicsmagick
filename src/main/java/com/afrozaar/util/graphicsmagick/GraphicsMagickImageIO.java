@@ -3,6 +3,12 @@ package com.afrozaar.util.graphicsmagick;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
+import com.afrozaar.util.graphicsmagick.data.ImageInfo;
+import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
+import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
+import com.afrozaar.util.graphicsmagick.meta.MetaParser;
+import com.afrozaar.util.graphicsmagick.mime.MimeService;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
@@ -31,30 +37,21 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class GraphicsMagicImageIO extends AbstractImageIO {
+public class GraphicsMagickImageIO extends AbstractImageIO {
 
-    public GraphicsMagicImageIO() {
+    public GraphicsMagickImageIO() {
         super();
     }
 
-    public GraphicsMagicImageIO(String tempDir) {
+    public GraphicsMagickImageIO(String tempDir) {
         super(tempDir);
     }
 
     private static final String COMMAND_CONVERT = "convert";
     private static final String COMMAND_IDENTIFY = "identify";
-    private static final Map<String, String> MIME_TYPE_MAP = ImmutableMap.<String, String>builder()
-            .put("ps", "application/postscript")
-            .put("pdf", "application/pdf")
-            .put("jpg", "image/jpeg")
-            .put("jpeg", "image/jpeg")
-            .put("gif", "image/gif")
-            .put("tiff", "image/tiff")
-            .build();
 
     private GMService service = new PooledGMService(new GMConnectionPoolConfig());
     private MimeService mimeService = new MimeService();
@@ -189,25 +186,25 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
         };
     }
 
-    /**
-     * Function producer that takes a resourceUri to fall back to when a type can not be resolved from {@link #MIME_TYPE_MAP}.
-     * The produced function takes a type:String input to retrieve from the {@link #MIME_TYPE_MAP}.
-     */
-    private final Function<String, Function<String, String>> MIME_TYPE_RESOLVER = resourceUri -> type -> ofNullable(MIME_TYPE_MAP.get(type.toLowerCase()))
-            .orElseGet(() -> {
-                try {
-                    return mimeService.getMimeType(resourceUri);
-                } catch (IOException e) {
-                    return format("image/%s", type.toLowerCase());
-                }
-            });
-
     @Override
     public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException {
         try {
             //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
+            /**
+             * -----
+             * >$ identify -format "width=%w\nheight=%h\ntype=%m\nname=%t\n" maxi.jpg
+             * >width=1024
+             * >height=768
+             * >type=JPEG
+             * >name=maxi
+             * ----
+             *
+             * NOTE: type is not the full MIME format: &lt;base_type&gt;/&lt;subtype&gt;
+             */
+            final String IDENTIFY_FORMAT = "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n";
+
             LOG.debug("identify on {}", tempImageLoc);
-            String execute = service.execute(COMMAND_IDENTIFY, "-format", "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n", tempImageLoc);
+            String execute = service.execute(COMMAND_IDENTIFY, "-format", IDENTIFY_FORMAT, tempImageLoc);
             LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
 
             String[] split2 = execute.split("\n");
@@ -220,7 +217,9 @@ public class GraphicsMagicImageIO extends AbstractImageIO {
             final int width = Integer.parseInt(split.get("width"));
             final int height = Integer.parseInt(split.get("height"));
 
-            final String mimeType = ofNullable(split.get("type")).map(MIME_TYPE_RESOLVER.apply(tempImageLoc)).orElse("unknown");
+            final String mimeType = ofNullable(split.get("type"))
+                    .map(mimeService.resolveFromBaseTypeOrInterrogate(tempImageLoc))
+                    .orElse("unknown");
             final String topName = split.get("name");
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);

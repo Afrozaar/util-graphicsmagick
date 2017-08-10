@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 public class AbstractImageIOTest {
-    AbstractImageIO imageIO = new GraphicsMagicImageIO();
+    AbstractImageIO imageIO = new GraphicsMagickImageIO();
 
     @Test
     public void testGetExtensionFromSourceWithQueryParameters_MustNotHaveTheQueryParameters() {

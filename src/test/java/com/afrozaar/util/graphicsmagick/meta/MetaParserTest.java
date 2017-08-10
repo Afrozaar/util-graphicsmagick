@@ -1,4 +1,4 @@
-package com.afrozaar.util.graphicsmagick;
+package com.afrozaar.util.graphicsmagick.meta;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
