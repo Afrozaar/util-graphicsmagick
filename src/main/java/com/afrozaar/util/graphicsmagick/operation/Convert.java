@@ -1,0 +1,37 @@
+package com.afrozaar.util.graphicsmagick.operation;
+
+import static java.util.Optional.ofNullable;
+
+import com.afrozaar.util.graphicsmagick.data.ImageInfo;
+
+import org.im4java.core.IMOperation;
+import org.im4java.core.Operation;
+
+import javax.annotation.Nullable;
+
+import java.io.IOException;
+
+/**
+ * @author johan
+ */
+public class Convert {
+
+    public static String COMMAND = "convert";
+
+    public static Operation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality) throws IOException {
+        IMOperation op = new IMOperation();
+        op.limit("threads").addRawArgs("2");
+
+        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
+            op.density(300);
+        }
+
+        op.strip();
+        op.addImage(tempImageLoc);
+
+        ofNullable(imageQuality).ifPresent(op::quality);
+
+        op.colorspace("rgb");
+        return op;
+    }
+}
