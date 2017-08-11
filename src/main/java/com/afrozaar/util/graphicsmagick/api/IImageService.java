@@ -18,7 +18,7 @@ public interface IImageService {
 
     String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException;
 
-    String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix, Double imageQuality) throws IOException;
+    String crop(String templateImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix, @Nullable Double imageQuality) throws IOException;
 
     ByteSource loadImage(String tempImageLoc);
 
