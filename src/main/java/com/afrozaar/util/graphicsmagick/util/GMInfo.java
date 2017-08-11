@@ -16,7 +16,7 @@ public class GMInfo {
         try {
             final Process exec = Runtime.getRuntime().exec("gm convert -list resource");
 
-            if (exec.waitFor(100, TimeUnit.MILLISECONDS)) {
+            if (exec.waitFor(1L, TimeUnit.SECONDS)) {
                 return IOUtils.toString(exec.getInputStream(), StandardCharsets.UTF_8);
             } else {
                 return IOUtils.toString(exec.getErrorStream(), StandardCharsets.UTF_8);

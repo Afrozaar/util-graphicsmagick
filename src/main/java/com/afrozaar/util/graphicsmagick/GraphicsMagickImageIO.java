@@ -143,9 +143,9 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         final GMBatchCommand batchCommand = new GMBatchCommand(service, command);
         final String uuid = UUID.randomUUID().toString();
 
-        LOG.debug("running operation {} (trace={})", op, uuid);
+        LOG.debug("Operating starting: {} {} (trace={})", command, op, uuid);
         batchCommand.run(op);
-        LOG.debug("Operation {} took {} (trace={})", op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
+        LOG.debug("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
     }
 
     private String runOperationWithOutput(String command, Operation operation) throws InterruptedException, IOException, IM4JavaException {
@@ -155,7 +155,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         batchCommand.setOutputConsumer(outputResult);
 
         batchCommand.run(operation);
-        LOG.debug("Operation {} {} took {}", command, operation, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS));
+        LOG.debug("Operation with output: {} {} took {}", command, operation, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS));
 
         return outputResult.getOutput();
     }
