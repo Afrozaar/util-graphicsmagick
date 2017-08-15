@@ -3,6 +3,7 @@ package com.afrozaar.util.graphicsmagick;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.io.IOException;
  */
 public class GraphicsMagickImageIOTest {
 
+    @Ignore // jenkins doesn't have it installed
     @Test
     public void resizePdf() throws IOException {
         GraphicsMagickImageIO gmio = new GraphicsMagickImageIO();
