@@ -3,6 +3,7 @@ package com.afrozaar.util.graphicsmagick.operation;
 import static java.util.Optional.ofNullable;
 
 import com.afrozaar.util.graphicsmagick.data.ImageInfo;
+import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 
 import org.im4java.core.IMOperation;
 import org.im4java.core.Operation;
@@ -20,7 +21,10 @@ public class Convert {
 
     public static Operation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality) throws IOException {
         IMOperation op = new IMOperation();
-        op.limit("threads").addRawArgs("2");
+
+        if (RuntimeLimits.applyLimits()) {
+            op.limit("threads").addRawArgs("2");
+        }
 
         if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
             op.density(300);

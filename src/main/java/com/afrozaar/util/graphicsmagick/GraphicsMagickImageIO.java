@@ -11,7 +11,9 @@ import com.afrozaar.util.graphicsmagick.mime.MimeService;
 import com.afrozaar.util.graphicsmagick.operation.Convert;
 import com.afrozaar.util.graphicsmagick.operation.Identify;
 import com.afrozaar.util.graphicsmagick.operation.OutputResult;
+import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
@@ -58,8 +60,15 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     private GMConnectionPoolConfig config = new GMConnectionPoolConfig();
 
     {
-        config.setMaxIdle(4);
-        config.setMaxActive(4);
+        if (RuntimeLimits.applyLimits()) {
+            config.setMaxIdle(4);
+            config.setMaxActive(4);
+        }
+
+        LOG.info("Initialised GraphicsMagickImageIO with config: {}", MoreObjects.toStringHelper(config)
+                .add("maxIdle", config.getMaxIdle())
+                .add("maxActive", config.getMaxActive())
+                .toString());
     }
 
     private GMService service = new PooledGMService(config);
