@@ -143,7 +143,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         final GMBatchCommand batchCommand = new GMBatchCommand(service, command);
         final String uuid = UUID.randomUUID().toString();
 
-        LOG.debug("Operating starting: {} {} (trace={})", command, op, uuid);
+        LOG.debug("Operation starting: {} {} (trace={})", command, op, uuid);
         batchCommand.run(op);
         LOG.debug("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
     }
