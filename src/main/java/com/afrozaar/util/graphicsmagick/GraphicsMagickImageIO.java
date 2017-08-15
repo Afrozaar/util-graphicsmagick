@@ -8,21 +8,25 @@ import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
 import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 import com.afrozaar.util.graphicsmagick.meta.MetaParser;
 import com.afrozaar.util.graphicsmagick.mime.MimeService;
+import com.afrozaar.util.graphicsmagick.operation.Convert;
+import com.afrozaar.util.graphicsmagick.operation.Identify;
+import com.afrozaar.util.graphicsmagick.operation.OutputResult;
+import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
 
 import org.springframework.stereotype.Component;
 
-import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
-import org.gm4java.engine.GMServiceException;
 import org.gm4java.engine.support.GMConnectionPoolConfig;
 import org.gm4java.engine.support.PooledGMService;
 import org.gm4java.im4java.GMBatchCommand;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
+import org.im4java.core.Operation;
 
 import javax.annotation.Nullable;
 
@@ -32,11 +36,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -50,10 +57,21 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         super(tempDir);
     }
 
-    private static final String COMMAND_CONVERT = "convert";
-    private static final String COMMAND_IDENTIFY = "identify";
+    private GMConnectionPoolConfig config = new GMConnectionPoolConfig();
 
-    private GMService service = new PooledGMService(new GMConnectionPoolConfig());
+    {
+        if (RuntimeLimits.applyLimits()) {
+            config.setMaxIdle(4);
+            config.setMaxActive(4);
+        }
+
+        LOG.info("Initialised GraphicsMagickImageIO with config: {}", MoreObjects.toStringHelper(config)
+                .add("maxIdle", config.getMaxIdle())
+                .add("maxActive", config.getMaxActive())
+                .toString());
+    }
+
+    private GMService service = new PooledGMService(config);
     private MimeService mimeService = new MimeService();
 
     public static class XY {
@@ -85,76 +103,70 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix, Double imageQuality) throws IOException {
-        final GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
+    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality) throws IOException {
 
-        IMOperation op = createImOperation(tempImageLoc, imageQuality);
-        op.resize(maximumWidth, maximumHeight, ">");
+        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
+        ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">");
 
         final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
-        op.addImage(outputFileName);
+        operation.addImage(outputFileName);
 
         // execute the operation
         try {
-            LOG.debug("running operation {}", op);
-            command.run(op);
-            LOG.debug("op {} done", op);
+            runOperation(Convert.COMMAND, operation);
             return outputFileName;
         } catch (InterruptedException | IM4JavaException e) {
             throw new IOException(e);
         }
     }
 
-    @Override
-    public String crop(String tempImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix) throws IOException {
-        return crop(tempImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, null);
-    }
 
     @Override
-    public String crop(String tempImageLoc, XY size, XY offsets, XY resizeXY, String newSuffix, Double imageQuality) throws IOException {
-        return crop(tempImageLoc, size, offsets, Optional.of(resizeXY), newSuffix, imageQuality);
-    }
-
-    public String crop(String tempImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix) throws IOException {
+    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix) throws IOException {
         return crop(tempImageLoc, size, offsets, resizeXY, newSuffix, null);
     }
 
-    public String crop(String tempImageLoc, XY size, XY offsets, Optional<XY> resizeXY, String newSuffix, Double imageQuality) throws IOException {
-        GMBatchCommand command = new GMBatchCommand(service, COMMAND_CONVERT);
+    @Override
+    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality) throws IOException {
 
-        IMOperation op = createImOperation(tempImageLoc, imageQuality);
-        op.crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
-        resizeXY.ifPresent(xy -> op.resize(xy.getX(), xy.getY(), ">"));
+        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
+        ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
+        ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
 
         String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
-        op.addImage(outputFileName);
+        operation.addImage(outputFileName);
 
         // execute the operation
         try {
-            LOG.debug("running operation {}", op);
-            command.run(op);
-            LOG.debug("op {} done", op);
+            runOperation(Convert.COMMAND, operation);
             return outputFileName;
         } catch (InterruptedException | IM4JavaException e) {
             throw new GraphicsMagickException(outputFileName, e.getMessage(), e);
         }
     }
 
-    private IMOperation createImOperation(String tempImageLoc, Double imageQuality) throws IOException {
-        IMOperation op = new IMOperation();
+    private void runOperation(String command, Operation op) throws InterruptedException, IOException, IM4JavaException {
+        final Long start = System.currentTimeMillis();
+        final GMBatchCommand batchCommand = new GMBatchCommand(service, command);
+        final String uuid = UUID.randomUUID().toString();
 
-        final ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
-        if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
-            op.density(300);
-        }
+        LOG.debug("Operation starting: {} {} (trace={})", command, op, uuid);
+        batchCommand.run(op);
+        LOG.debug("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
+    }
 
-        op.strip();
-        op.addImage(tempImageLoc);
-        if (imageQuality != null) {
-            op.quality(imageQuality);
-        }
-        op.colorspace("rgb");
-        return op;
+    private String runOperationWithOutput(String command, Operation operation) throws InterruptedException, IOException, IM4JavaException {
+        final Long start = System.currentTimeMillis();
+        final GMBatchCommand batchCommand = new GMBatchCommand(service, command);
+        final OutputResult outputResult = new OutputResult();
+        batchCommand.setOutputConsumer(outputResult);
+
+        batchCommand.run(operation);
+        LOG.debug("Operation with output: {} {} took {}", command, operation, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS));
+
+        return outputResult.getOutput();
     }
 
     private String getOutputFileName(String tempImageLoc, @Nullable String suffix) {
@@ -189,30 +201,19 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     @Override
     public ImageInfo getImageInfo(final String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException {
         try {
-            //gm identify -format "%w\n%h\n%m\n%t\n" 44284001.JPG
-            /**
-             * -----
-             * >$ identify -format "width=%w\nheight=%h\ntype=%m\nname=%t\n" maxi.jpg
-             * >width=1024
-             * >height=768
-             * >type=JPEG
-             * >name=maxi
-             * ----
-             *
-             * NOTE: type is not the full MIME format: &lt;base_type&gt;/&lt;subtype&gt;
-             */
-            final String IDENTIFY_FORMAT = "width=%w\\nheight=%h\\ntype=%m\\nname=%t\\n";
-
-            LOG.debug("identify on {}", tempImageLoc);
-            String execute = service.execute(COMMAND_IDENTIFY, "-format", IDENTIFY_FORMAT, tempImageLoc);
-            LOG.debug("executed identify {} and got {}", tempImageLoc, execute);
+            final String execute = runOperationWithOutput(Identify.COMMAND, Identify.identify(tempImageLoc));
 
             String[] split2 = execute.split("\n");
             LOG.debug("result from gm: {}", Arrays.asList(split2));
-            Map<String, String> split = Arrays.stream(split2).filter(x -> x.contains("=")).map(x -> {
-                String[] keyValue = x.split("=");
-                return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
-            }).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> a)); // when calling info on gifs we get width and height per image, all the widths and heights are going to be the same
+
+            Map<String, String> split = Arrays.stream(split2)
+                    .filter(x -> x.contains("="))
+                    .map(x -> {
+                        String[] keyValue = x.split("=");
+                        return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
+                    })
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> a));
+            // when calling info on gifs we get width and height per image, all the widths and heights are going to be the same
 
             final int width = Integer.parseInt(split.get("width"));
             final int height = Integer.parseInt(split.get("height"));
@@ -229,22 +230,22 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
             LOG.debug("returning image info {} for url {}", imageInfo, tempImageLoc);
             return imageInfo;
-        } catch (GMException | GMServiceException e) {
+        } catch (IM4JavaException | InterruptedException e) {
             throw new GraphicsMagickException(null, e.getMessage(), e);
         }
     }
 
-    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc, MetaDataFormat format) {
+    private Optional<Map<String, Object>> getImageMetaData(final String tempImageLoc, @Nullable MetaDataFormat format) {
         // gm identify -verbose ~/Pictures/nikon/nikon_20160214/darktable_exported/img_0001.jpg
         try {
-            final String execute = service.execute(COMMAND_IDENTIFY, "-verbose", tempImageLoc);
+            final String execute = runOperationWithOutput(Identify.COMMAND, Identify.identifyVerbose(tempImageLoc));
 
             if (format == MetaDataFormat.RAW) {
                 return Optional.of(ImmutableMap.of("data", execute));
             }
 
             return MetaParser.parseResult(execute);
-        } catch (IOException | GMException | GMServiceException e) {
+        } catch (IOException | InterruptedException | IM4JavaException e) {
             LOG.error("Error ", e);
             return Optional.empty();
         }
