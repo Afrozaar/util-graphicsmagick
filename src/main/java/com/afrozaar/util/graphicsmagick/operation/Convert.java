@@ -32,6 +32,7 @@ public class Convert {
 
         op.strip();
         op.addImage(tempImageLoc);
+        op.autoOrient();
 
         ofNullable(imageQuality).ifPresent(op::quality);
 
