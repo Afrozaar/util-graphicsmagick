@@ -108,7 +108,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">");
-        ((IMOperation) operation).background("white").flatten();
+        ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
         final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
         operation.addImage(outputFileName);
@@ -135,7 +135,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
         ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
-        ((IMOperation) operation).background("white").flatten();
+        ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
         String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
         operation.addImage(outputFileName);
