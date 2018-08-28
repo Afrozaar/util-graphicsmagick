@@ -143,7 +143,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
         LOG.debug("Operation starting: {} {} (trace={})", command, op, uuid);
         batchCommand.run(op);
-        LOG.info("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
+        LOG.debug("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
     }
 
     private String runOperationWithOutput(String command, Operation operation) throws InterruptedException, IOException, IM4JavaException {
