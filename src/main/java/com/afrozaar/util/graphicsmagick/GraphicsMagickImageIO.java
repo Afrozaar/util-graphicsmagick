@@ -1,8 +1,5 @@
 package com.afrozaar.util.graphicsmagick;
 
-import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
-
 import com.afrozaar.util.graphicsmagick.data.ImageInfo;
 import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
 import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
@@ -12,14 +9,10 @@ import com.afrozaar.util.graphicsmagick.operation.Convert;
 import com.afrozaar.util.graphicsmagick.operation.Identify;
 import com.afrozaar.util.graphicsmagick.operation.OutputResult;
 import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
-
-import org.springframework.stereotype.Component;
-
 import org.gm4java.engine.GMService;
 import org.gm4java.engine.support.GMConnectionPoolConfig;
 import org.gm4java.engine.support.PooledGMService;
@@ -27,24 +20,18 @@ import org.gm4java.im4java.GMBatchCommand;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.Operation;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 @Component
 public class GraphicsMagickImageIO extends AbstractImageIO {
@@ -107,7 +94,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
-        ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">");
+        ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace("Line");
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
         final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
@@ -133,7 +120,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
-        ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY());
+        ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace("Line");
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
@@ -156,7 +143,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
         LOG.debug("Operation starting: {} {} (trace={})", command, op, uuid);
         batchCommand.run(op);
-        LOG.debug("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
+        LOG.info("Operation complete: {} {} took {} (trace={})", command, op, Duration.of(System.currentTimeMillis() - start, ChronoUnit.MILLIS), uuid);
     }
 
     private String runOperationWithOutput(String command, Operation operation) throws InterruptedException, IOException, IM4JavaException {
