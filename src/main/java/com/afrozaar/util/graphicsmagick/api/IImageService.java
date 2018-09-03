@@ -9,6 +9,7 @@ import com.google.common.io.ByteSource;
 import javax.annotation.Nullable;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 public interface IImageService {
 
@@ -24,9 +25,9 @@ public interface IImageService {
 
     ImageInfo getImageInfo(String tempImageLoc, boolean includeMeta, MetaDataFormat format) throws IOException;
 
-    String downloadResource(String archiveUrl, ByteSource simpleResource) throws IOException;
+    String downloadResource(String archiveUrl, ByteSource simpleResource) throws IOException, URISyntaxException;
 
-    String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException;
+    String saveImageToTemp(ByteSource findSimpleResource, String sourceName) throws IOException, URISyntaxException;
 
     void cleanup(String downloadResource);
 

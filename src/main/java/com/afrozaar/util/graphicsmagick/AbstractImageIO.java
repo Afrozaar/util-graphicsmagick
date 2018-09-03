@@ -1,8 +1,8 @@
 package com.afrozaar.util.graphicsmagick;
 
 import static java.lang.String.format;
-import static java.util.Optional.ofNullable;
 
+import com.afrozaar.util.Regex;
 import com.afrozaar.util.graphicsmagick.api.IImageService;
 
 import com.google.common.io.ByteSource;
@@ -14,11 +14,14 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.Random;
+
+import javax.annotation.PostConstruct;
 
 public abstract class AbstractImageIO implements IImageService {
 
@@ -57,40 +60,33 @@ public abstract class AbstractImageIO implements IImageService {
     public void createTempDir(String tempDir) {
         final File dir = new File(tempDir);
         if (!dir.exists() && !dir.mkdirs()) {
-            throw new RuntimeException(format("AbstractImageIO could not prepare the tempDir (Directory did not exist, and could not be created). tempDir=%s", this.tempDir));
+            throw new RuntimeException(format("AbstractImageIO could not prepare the tempDir (Directory did not exist, and could not be created). tempDir=%s",
+                                              this.tempDir));
         }
     }
 
     @Override
-    public String downloadResource(final String archiveUrl, ByteSource simpleResource) throws IOException {
+    public String downloadResource(final String archiveUrl, ByteSource simpleResource) throws IOException, URISyntaxException {
         return saveImageToTemp(simpleResource, archiveUrl);
     }
 
-    protected String getTempFileName(String sourceName) {
-        String suffix = ofNullable(getExtension(sourceName)).map(String::toLowerCase).orElse("");
-        return format("%s%sresource_%s%s", tempDir, File.separator, getRandomAlpha(5), suffix) ;
+    protected String getTempFileName(String sourceName) throws URISyntaxException {
+        String suffix = getExtensionFromUrl(sourceName).map(String::toLowerCase).orElse("");
+        return format("%s%sresource_%s%s", tempDir, File.separator, getRandomAlpha(5), suffix);
     }
 
-    protected String getExtension(String imageName) {
-        if (imageName == null) {
-            return "";
-        }
-        int indexOf = imageName.lastIndexOf(".");
-        if (indexOf != -1) {
-            final String substring = imageName.substring(indexOf);
-            if (substring.contains("?")) {
-                return substring.substring(0, substring.indexOf("?"));
-            }
-            if (substring.toLowerCase().contains("%3f")) {
-                return substring.substring(0, substring.toLowerCase().indexOf("%3f"));
-            }
-            return substring;
-        } else {
-            return null;
-        }
+    protected Optional<String> getExtensionFromFile(String imageName) {
+        return Regex.extractMatch(".*\\.(.*)\\Z", imageName);
+    }
+
+    protected Optional<String> getExtensionFromUrl(String imageName) throws URISyntaxException {
+        URI uri = new URI(imageName);
+        String path = uri.getPath();
+        return getExtensionFromFile(path);
     }
 
     static char[] alphabet = new char[26];
+
     {
         for (int i = 0; i < 26; i++) {
             alphabet[i] = (char) ('A' + i);
