@@ -68,7 +68,7 @@ public abstract class AbstractImageIO implements IImageService {
 
     protected String getTempFileName(String sourceName) throws URISyntaxException {
         String suffix = getExtensionFromUrl(sourceName).map(String::toLowerCase).orElse("");
-        return format("%s%sresource_%s%s", tempDir, File.separator, getRandomAlpha(5), suffix);
+        return format("%s%sresource_%s.%s", tempDir, File.separator, getRandomAlpha(5), suffix);
     }
 
     protected Optional<String> getExtensionFromFile(String imageName) {

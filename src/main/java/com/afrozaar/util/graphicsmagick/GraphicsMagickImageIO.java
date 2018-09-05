@@ -123,10 +123,15 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     @Override
     public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality)
             throws IOException {
+        String interlace = "Line";
+        if (tempImageLoc.endsWith(".gif")) {
+            tempImageLoc = coalesce(tempImageLoc);
+            interlace = "None";
+        }
 
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
-        ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace("Line");
+        ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace(interlace);
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
