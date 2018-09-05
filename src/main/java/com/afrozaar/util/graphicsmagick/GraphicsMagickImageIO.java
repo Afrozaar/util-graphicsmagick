@@ -9,12 +9,10 @@ import com.afrozaar.util.graphicsmagick.operation.Convert;
 import com.afrozaar.util.graphicsmagick.operation.Identify;
 import com.afrozaar.util.graphicsmagick.operation.OutputResult;
 import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteSource;
-
 import org.gm4java.engine.GMService;
 import org.gm4java.engine.support.GMConnectionPoolConfig;
 import org.gm4java.engine.support.PooledGMService;
@@ -22,11 +20,9 @@ import org.gm4java.im4java.GMBatchCommand;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.Operation;
-
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-
 import java.io.*;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -151,14 +147,13 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, null);
         ((IMOperation) operation).coalesce();
 
-        final String outputFileName = getOutputFileName(tempImageLoc, null);
-        operation.addImage(outputFileName);
-
         // execute the operation
         try {
+            final String outputFileName = getOutputFileName(tempImageLoc, null);
+            operation.addImage(outputFileName);
             runOperation(Convert.COMMAND, operation);
             return outputFileName;
-        } catch (InterruptedException | IM4JavaException e) {
+        } catch (InterruptedException | IM4JavaException | URISyntaxException e) {
             throw new IOException(e);
         }
     }

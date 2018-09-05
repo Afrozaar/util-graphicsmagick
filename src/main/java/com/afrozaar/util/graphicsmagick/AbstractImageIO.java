@@ -1,19 +1,15 @@
 package com.afrozaar.util.graphicsmagick;
 
-import static java.lang.String.format;
-
 import com.afrozaar.util.Regex;
 import com.afrozaar.util.graphicsmagick.api.IImageService;
-
 import com.google.common.io.ByteSource;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
-
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -21,7 +17,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Random;
 
-import javax.annotation.PostConstruct;
+import static java.lang.String.format;
 
 public abstract class AbstractImageIO implements IImageService {
 
