@@ -90,11 +90,17 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality) throws IOException {
+    public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality) throws IOException {
+        String interlace = "Line";
+        if (tempImageLoc.endsWith(".gif")) {
+            tempImageLoc = coalesce(tempImageLoc);
+            interlace = "None";
+        }
 
+        tempImageLoc = coalesce(tempImageLoc);
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
-        ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace("Line");
+        ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
         final String outputFileName = getOutputFileName(tempImageLoc, newSuffix);
@@ -108,7 +114,6 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             throw new IOException(e);
         }
     }
-
 
     @Override
     public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix) throws IOException {
@@ -133,6 +138,23 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             return outputFileName;
         } catch (InterruptedException | IM4JavaException e) {
             throw new GraphicsMagickException(outputFileName, e.getMessage(), e);
+        }
+    }
+
+    private String coalesce(final String tempImageLoc) throws IOException {
+        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, null);
+        ((IMOperation) operation).coalesce();
+
+        final String outputFileName = getOutputFileName(tempImageLoc, null);
+        operation.addImage(outputFileName);
+
+        // execute the operation
+        try {
+            runOperation(Convert.COMMAND, operation);
+            return outputFileName;
+        } catch (InterruptedException | IM4JavaException e) {
+            throw new IOException(e);
         }
     }
 
