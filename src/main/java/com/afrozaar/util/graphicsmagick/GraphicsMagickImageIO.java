@@ -98,7 +98,6 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             interlace = "None";
         }
 
-        tempImageLoc = coalesce(tempImageLoc);
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
