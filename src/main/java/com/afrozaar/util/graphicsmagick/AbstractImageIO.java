@@ -2,14 +2,18 @@ package com.afrozaar.util.graphicsmagick;
 
 import com.afrozaar.util.Regex;
 import com.afrozaar.util.graphicsmagick.api.IImageService;
+
 import com.google.common.io.ByteSource;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -72,7 +76,7 @@ public abstract class AbstractImageIO implements IImageService {
     }
 
     protected Optional<String> getExtensionFromFile(String imageName) {
-        return Regex.extractMatch(".*\\.(.*)\\Z", imageName);
+        return Regex.extractMatch(".*?\\.([.\\w]*).*", imageName);
     }
 
     protected Optional<String> getExtensionFromUrl(String imageName) throws URISyntaxException {
