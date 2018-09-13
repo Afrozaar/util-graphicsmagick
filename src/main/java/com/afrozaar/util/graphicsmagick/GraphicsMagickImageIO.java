@@ -7,7 +7,6 @@ import com.afrozaar.util.graphicsmagick.data.ImageInfo;
 import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
 import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 import com.afrozaar.util.graphicsmagick.meta.MetaParser;
-import com.afrozaar.util.graphicsmagick.mime.MimeService;
 import com.afrozaar.util.graphicsmagick.operation.Convert;
 import com.afrozaar.util.graphicsmagick.operation.Identify;
 import com.afrozaar.util.graphicsmagick.operation.OutputResult;
@@ -55,8 +54,6 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     public GraphicsMagickImageIO(GMService service) {
         this.service = service;
     }
-
-    private MimeService mimeService = new MimeService();
 
     public static class XY {
         private int x;
@@ -231,8 +228,8 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             final int height = Integer.parseInt(split.get("height"));
 
             final String mimeType = ofNullable(split.get("type"))
-                    .map(mimeService.resolveFromBaseTypeOrInterrogate(tempImageLoc))
-                    .orElse("unknown");
+                    .map(type -> "image/" + type.toLowerCase())
+                    .orElse("application/octet-stream");
             final String topName = split.get("name");
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);

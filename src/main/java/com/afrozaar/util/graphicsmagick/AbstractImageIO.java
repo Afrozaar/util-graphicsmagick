@@ -76,7 +76,7 @@ public abstract class AbstractImageIO implements IImageService {
     }
 
     protected Optional<String> getExtensionFromFile(String imageName) {
-        return Regex.extractMatch(".*?\\.([.\\w]*).*", imageName);
+        return Regex.extractMatch(".*?\\.([.\\w]*).*", imageName).filter(x -> x.trim().length() != 0);
     }
 
     protected Optional<String> getExtensionFromUrl(String imageName) throws URISyntaxException {
