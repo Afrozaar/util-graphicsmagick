@@ -12,9 +12,13 @@ import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FileCleanup {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileCleanup.class);
+
+    private static ExecutorService fileDelete = Executors.newCachedThreadPool();
 
     private static final ReferenceQueue<FileSystemResource> referenceQueue = new ReferenceQueue<>();
 
@@ -63,5 +67,9 @@ public class FileCleanup {
 
     public static FileSystemResource withCleanup(String source) {
         return withCleanup(new FileSystemResource(source));
+    }
+
+    public static void delete(String tempImageLoc) {
+        fileDelete.submit(() -> delete(new File(tempImageLoc)));
     }
 }

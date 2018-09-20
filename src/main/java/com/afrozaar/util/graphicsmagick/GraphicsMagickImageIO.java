@@ -3,6 +3,7 @@ package com.afrozaar.util.graphicsmagick;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
+import com.afrozaar.util.Regex;
 import com.afrozaar.util.graphicsmagick.data.ImageInfo;
 import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
 import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
@@ -10,6 +11,7 @@ import com.afrozaar.util.graphicsmagick.meta.MetaParser;
 import com.afrozaar.util.graphicsmagick.operation.Convert;
 import com.afrozaar.util.graphicsmagick.operation.Identify;
 import com.afrozaar.util.graphicsmagick.operation.OutputResult;
+import com.afrozaar.util.java8.Functions;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -32,13 +34,9 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -87,9 +85,11 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality)
             throws IOException {
         String interlace = "Line";
+        boolean deleteTemp = false;
         if (tempImageLoc.endsWith(".gif")) {
             tempImageLoc = coalesce(tempImageLoc);
             interlace = "None";
+            deleteTemp = true;
         }
 
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
@@ -105,6 +105,10 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             return outputFileName;
         } catch (InterruptedException | IM4JavaException | URISyntaxException e) {
             throw new IOException(e);
+        } finally {
+            if (deleteTemp) {
+                FileCleanup.delete(tempImageLoc);
+            }
         }
     }
 
@@ -117,9 +121,11 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality)
             throws IOException {
         String interlace = "Line";
+        boolean deleteTemp = false;
         if (tempImageLoc.endsWith(".gif")) {
             tempImageLoc = coalesce(tempImageLoc);
             interlace = "None";
+            deleteTemp = true;
         }
 
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
@@ -137,6 +143,10 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             return outputFileName;
         } catch (InterruptedException | IM4JavaException | URISyntaxException e) {
             throw new GraphicsMagickException(outputFileName, e.getMessage(), e);
+        } finally {
+            if (deleteTemp) {
+                FileCleanup.delete(tempImageLoc);
+            }
         }
     }
 
