@@ -222,27 +222,24 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         try {
             final String execute = runOperationWithOutput(Identify.COMMAND, Identify.identify(tempImageLoc));
 
-            String[] split2 = execute.split("\n");
-            LOG.debug("result from gm: {}", Arrays.asList(split2));
+            //LOG.debug("result from gm: {}", Arrays.asList(split2));
 
-            Map<String, String> split = Arrays.stream(split2)
-                    .filter(x -> x.contains("="))
-                    .map(x -> {
-                        String[] keyValue = x.split("=");
-                        return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
-                    })
-                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (a, b) -> a));
-            // when calling info on gifs we get width and height per image, all the widths and heights are going to be the same
+            Integer width = Regex.extractMatch("\\s*width=(\\d+)\\s*", execute).flatMap(Functions.emptyIfExceptionOther(Integer::parseInt)).orElse(null);
+            Integer height = Regex.extractMatch("\\s*height=(\\d+)\\s*", execute).flatMap(Functions.emptyIfExceptionOther(Integer::parseInt)).orElse(null);
+            Optional<String> type = Regex.extractMatch("\\s*type=(\\w+)\\s*", execute);
 
-            final int width = Integer.parseInt(split.get("width"));
-            final int height = Integer.parseInt(split.get("height"));
-
-            final String mimeType = ofNullable(split.get("type"))
-                    .map(type -> "image/" + type.toLowerCase())
+            if (width == null || height == null || !type.isPresent()) {
+                throw new IllegalArgumentException("error parsing result from graphics magick: " + execute + " cannot get image info");
+            }
+            final String mimeType = type
+                    .map(t -> "image/" + t.toLowerCase())
                     .orElse("application/octet-stream");
-            final String topName = split.get("name");
+            final String topName = Regex.extractMatch("\\s*name=(\\w+)\\s*", execute).orElse(null);
+
+            boolean multiFrame = Regex.isMatch("([\\S\\s]*width[\\s\\S]*){2,}", execute);
 
             ImageInfo imageInfo = new ImageInfo(width, height, mimeType, topName);
+            imageInfo.setMultiFrame(multiFrame);
             if (includeMeta) {
                 getImageMetaData(tempImageLoc, format).ifPresent(imageInfo::setMetaData);
             }

@@ -9,6 +9,7 @@ public class ImageInfo {
     private int height;
     private String mimeType;
     private Map<String, Object> metaData;
+    private boolean multiFrame;
 
     /**
      * @param width    the images width
@@ -69,5 +70,14 @@ public class ImageInfo {
     @Override
     public String toString() {
         return "ImageInfo [topName=" + topName + ", width=" + width + ", height=" + height + ", mimeType=" + mimeType + "]";
+    }
+
+    public void setMultiFrame(boolean multiFrame) {
+        this.multiFrame = multiFrame;
+
+    }
+
+    public boolean isMultiFrame() {
+        return multiFrame;
     }
 }
