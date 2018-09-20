@@ -9,6 +9,7 @@ import com.afrozaar.util.graphicsmagick.exception.GraphicsMagickException;
 import com.afrozaar.util.graphicsmagick.meta.MetaDataFormat;
 import com.afrozaar.util.graphicsmagick.meta.MetaParser;
 import com.afrozaar.util.graphicsmagick.operation.Convert;
+import com.afrozaar.util.graphicsmagick.operation.Flag;
 import com.afrozaar.util.graphicsmagick.operation.Identify;
 import com.afrozaar.util.graphicsmagick.operation.OutputResult;
 import com.afrozaar.util.java8.Functions;
@@ -82,7 +83,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality)
+    public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality, Flag... flags)
             throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
@@ -92,7 +93,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             interlace = "None";
             deleteTemp = true;
         }
-        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
@@ -117,7 +118,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality)
+    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality, Flag... flag)
             throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
@@ -127,7 +128,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             interlace = "None";
             deleteTemp = true;
         }
-        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flag);
         ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace(interlace);
 
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));

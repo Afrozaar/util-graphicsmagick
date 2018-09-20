@@ -7,18 +7,23 @@ import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 
 import org.im4java.core.IMOperation;
 
-import javax.annotation.Nullable;
-
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * @author johan
  */
 public class Convert {
 
+    private static final List<Flag> EMPTY_LIST = Collections.emptyList();
+
     public static String COMMAND = "convert";
 
-    public static IMOperation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality) throws IOException {
+    public static IMOperation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality, Flag... flags0) throws IOException {
         IMOperation op = new IMOperation();
 
         if (RuntimeLimits.applyLimits()) {
@@ -29,7 +34,12 @@ public class Convert {
             op.density(300);
         }
 
-        op.strip();
+        List<Flag> flags = flags0 == null ? EMPTY_LIST : Arrays.asList(flags0);
+
+        if (!flags.contains(Flag.NO_STRIP)) {
+            op.strip();
+        }
+
         op.addImage(tempImageLoc);
         op.autoOrient();
 
