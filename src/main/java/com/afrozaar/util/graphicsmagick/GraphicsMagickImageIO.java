@@ -86,13 +86,12 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
-        if (tempImageLoc.endsWith(".gif")) {
-            tempImageLoc = coalesce(tempImageLoc);
+        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        if ("image/gif".equals(imageInfo.getMimeType()) && imageInfo.isMultiFrame()) {
+            tempImageLoc = coalesce(tempImageLoc, imageInfo);
             interlace = "None";
             deleteTemp = true;
         }
-
-        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
@@ -122,15 +121,15 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
-        if (tempImageLoc.endsWith(".gif")) {
-            tempImageLoc = coalesce(tempImageLoc);
+        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
+        if ("image/gif".equals(imageInfo.getMimeType()) && imageInfo.isMultiFrame()) {
+            tempImageLoc = coalesce(tempImageLoc, imageInfo);
             interlace = "None";
             deleteTemp = true;
         }
-
-        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality);
         ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace(interlace);
+
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
         ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
 
@@ -150,12 +149,8 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         }
     }
 
-    private String coalesce(final String tempImageLoc) throws IOException {
-        ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
-        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, null);
-        ((IMOperation) operation).coalesce();
-
-        // execute the operation
+    private String coalesce(final String tempImageLoc, ImageInfo imageInfo) throws IOException {
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, null).coalesce();
         try {
             final String outputFileName = getOutputFileName(tempImageLoc, null);
             operation.addImage(outputFileName);

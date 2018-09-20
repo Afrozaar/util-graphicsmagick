@@ -6,7 +6,6 @@ import com.afrozaar.util.graphicsmagick.data.ImageInfo;
 import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 
 import org.im4java.core.IMOperation;
-import org.im4java.core.Operation;
 
 import javax.annotation.Nullable;
 
@@ -19,7 +18,7 @@ public class Convert {
 
     public static String COMMAND = "convert";
 
-    public static Operation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality) throws IOException {
+    public static IMOperation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality) throws IOException {
         IMOperation op = new IMOperation();
 
         if (RuntimeLimits.applyLimits()) {
