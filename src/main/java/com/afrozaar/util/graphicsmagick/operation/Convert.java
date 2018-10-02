@@ -8,8 +8,8 @@ import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 import org.im4java.core.IMOperation;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -23,7 +23,8 @@ public class Convert {
 
     public static String COMMAND = "convert";
 
-    public static IMOperation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality, Flag... flags0) throws IOException {
+    public static IMOperation createImOperation(String tempImageLoc, ImageInfo imageInfo, @Nullable Double imageQuality, EnumSet<Flag> flags)
+            throws IOException {
         IMOperation op = new IMOperation();
 
         if (RuntimeLimits.applyLimits()) {
@@ -33,8 +34,6 @@ public class Convert {
         if ("application/pdf".equalsIgnoreCase(imageInfo.getMimeType())) {
             op.density(300);
         }
-
-        List<Flag> flags = flags0 == null ? EMPTY_LIST : Arrays.asList(flags0);
 
         if (!flags.contains(Flag.NO_STRIP)) {
             op.strip();

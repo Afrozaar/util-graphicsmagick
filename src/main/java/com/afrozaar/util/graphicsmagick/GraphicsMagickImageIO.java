@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,12 +79,8 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String resize(final String tempImageLoc, int maximumWidth, int maximumHeight, String newSuffix) throws IOException {
-        return resize(tempImageLoc, maximumWidth, maximumHeight, newSuffix, null);
-    }
-
-    @Override
-    public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality, Flag... flags)
+    public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality,
+                         EnumSet<Flag> flags)
             throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
@@ -91,6 +88,9 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         if ("image/gif".equals(imageInfo.getMimeType()) && imageInfo.isMultiFrame()) {
             tempImageLoc = coalesce(tempImageLoc, imageInfo);
             interlace = "None";
+            if (flags.contains(Flag.AUTO_CONVERT)) {
+                newSuffix = "gif";
+            }
             deleteTemp = true;
         }
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
@@ -113,12 +113,8 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     @Override
-    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix) throws IOException {
-        return crop(tempImageLoc, size, offsets, resizeXY, newSuffix, null);
-    }
-
-    @Override
-    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality, Flag... flag)
+    public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality,
+                       EnumSet<Flag> flags)
             throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
@@ -126,9 +122,12 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         if ("image/gif".equals(imageInfo.getMimeType()) && imageInfo.isMultiFrame()) {
             tempImageLoc = coalesce(tempImageLoc, imageInfo);
             interlace = "None";
+            if (flags.contains(Flag.AUTO_CONVERT)) {
+                newSuffix = "gif";
+            }
             deleteTemp = true;
         }
-        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flag);
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
         ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace(interlace);
 
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
@@ -151,7 +150,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     }
 
     private String coalesce(final String tempImageLoc, ImageInfo imageInfo) throws IOException {
-        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, null).coalesce();
+        Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, null, EnumSet.noneOf(Flag.class)).coalesce();
         try {
             final String outputFileName = getOutputFileName(tempImageLoc, null);
             operation.addImage(outputFileName);
@@ -291,5 +290,4 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             LOG.warn("Could not clean up existing file: {}", fileToDelete);
         }
     }
-
 }
