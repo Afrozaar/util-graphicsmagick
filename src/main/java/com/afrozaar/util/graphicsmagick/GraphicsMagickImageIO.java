@@ -100,7 +100,13 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
 
-        if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN)) && !flags.contains(Flag.NO_FLATTEN)) {
+        // newsuffix is gif or newsuffix NOT set, don't flatten
+        if (newSuffix == null || newSuffix.equals("gif")) {
+        }
+
+        // if flags does not contain auto convert || flags DOES contain flatten 
+        else if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN))
+                && !flags.contains(Flag.NO_FLATTEN)) {
             flatten.accept((IMOperation) operation);
         }
 
