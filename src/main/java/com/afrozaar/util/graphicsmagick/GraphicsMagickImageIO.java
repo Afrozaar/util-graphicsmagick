@@ -26,6 +26,8 @@ import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
 import org.im4java.core.Operation;
 
+import java.util.function.Consumer;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -78,6 +80,8 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         }
     }
 
+    private static final Consumer<IMOperation> flatten = op -> op.background("white").flatten();
+
     @Override
     public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality,
                          EnumSet<Flag> flags)
@@ -88,14 +92,17 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         if ("image/gif".equals(imageInfo.getMimeType()) && imageInfo.isMultiFrame()) {
             tempImageLoc = coalesce(tempImageLoc, imageInfo);
             interlace = "None";
-            if (flags.contains(Flag.AUTO_CONVERT)) {
+            if (flags.contains(Flag.AUTO_CONVERT) && newSuffix != null) {
                 newSuffix = "gif";
             }
             deleteTemp = true;
         }
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
-        ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
+
+        if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN)) && !flags.contains(Flag.NO_FLATTEN)) {
+            flatten.accept((IMOperation) operation);
+        }
 
         // execute the operation
         try {
