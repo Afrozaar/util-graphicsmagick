@@ -8,7 +8,7 @@
     </appender>
 
     <logger name="com.afrozaar.util.graphicsmagick.exiftool" level="TRACE" />
-    <logger name="com.afrozaar" level="TRACE" />
+    <logger name="com.afrozaar" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

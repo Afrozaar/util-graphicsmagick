@@ -67,11 +67,6 @@ public class ImageInfo {
         this.metaData = metaData;
     }
 
-    @Override
-    public String toString() {
-        return "ImageInfo [topName=" + topName + ", width=" + width + ", height=" + height + ", mimeType=" + mimeType + "]";
-    }
-
     public void setMultiFrame(boolean multiFrame) {
         this.multiFrame = multiFrame;
 
@@ -79,5 +74,11 @@ public class ImageInfo {
 
     public boolean isMultiFrame() {
         return multiFrame;
+    }
+
+    @Override
+    public String toString() {
+        return "ImageInfo [topName=" + topName + ", width=" + width + ", height=" + height + ", mimeType=" + mimeType + ", metaData=" + metaData
+                + ", multiFrame=" + multiFrame + "]";
     }
 }

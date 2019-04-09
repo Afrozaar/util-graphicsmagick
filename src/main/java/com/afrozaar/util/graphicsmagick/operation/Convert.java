@@ -8,9 +8,7 @@ import com.afrozaar.util.graphicsmagick.util.RuntimeLimits;
 import org.im4java.core.IMOperation;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -18,8 +16,6 @@ import javax.annotation.Nullable;
  * @author johan
  */
 public class Convert {
-
-    private static final List<Flag> EMPTY_LIST = Collections.emptyList();
 
     public static String COMMAND = "convert";
 

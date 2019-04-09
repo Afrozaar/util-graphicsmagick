@@ -4,7 +4,10 @@ import java.io.IOException;
 
 public class GraphicsMagickException extends IOException {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GraphicsMagickException.class);
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4089890120474045526L;
     private String temporaryFileLocation;
 
     public GraphicsMagickException(String temporaryFileLocation, String message, Exception exception) {

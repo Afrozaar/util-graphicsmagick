@@ -18,6 +18,7 @@ public class ImageLoc implements Externalizable {
     private int width;
     private int height;
     private String mimeType;
+    @SuppressWarnings("unused")
     private boolean error;
 
     public ImageLoc() {

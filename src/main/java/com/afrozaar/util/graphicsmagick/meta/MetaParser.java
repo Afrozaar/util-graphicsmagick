@@ -85,15 +85,6 @@ public class MetaParser {
         }
     }
 
-    private static int charCount(final int count, final char chr, final int index, final String input) {
-        if (index >= input.length()) {
-            return count;
-        } else {
-            int newCount = input.charAt(index) == chr ? count + 1 : count;
-            return charCount(newCount, chr, index + 1, input);
-        }
-    }
-
     private static boolean isEmptyLine(String line) {
         return Strings.isNullOrEmpty(line) || line.trim().isEmpty();
     }
@@ -122,9 +113,9 @@ public class MetaParser {
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    static class Meta {
+    public static class Meta {
         Meta parent;
-        Map.Entry data;
+        Map.Entry<?, ?> data;
         int depth = 0;
         Set<Meta> children = Sets.newLinkedHashSet();
 
@@ -154,13 +145,18 @@ public class MetaParser {
             return children;
         }
 
-        public Map.Entry getData() {
+        public Map.Entry<?, ?> getData() {
             return data;
         }
 
         @JsonIgnore
         public int getDepth() {
             return depth;
+        }
+
+        @Override
+        public String toString() {
+            return "Meta [data=" + data + ", depth=" + depth + (children == null ? "" : ", children=" + children) + "]";
         }
     }
 }

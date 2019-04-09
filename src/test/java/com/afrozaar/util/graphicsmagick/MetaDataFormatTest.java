@@ -9,6 +9,7 @@ import org.junit.Test;
 
 public class MetaDataFormatTest {
 
+    @SuppressWarnings("unused")
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MetaDataFormatTest.class);
 
     @Test
@@ -35,11 +36,10 @@ public class MetaDataFormatTest {
     public void When_raw_Expect_RAW() {
         assertThat(MetaDataFormat.fromString("raw")).isEqualTo(MetaDataFormat.RAW);
     }
-    
+
     @Test
     public void When_NULL_Expect_PARSED() {
         assertThat(MetaDataFormat.fromString("raw")).isEqualTo(MetaDataFormat.RAW);
     }
-
 
 }

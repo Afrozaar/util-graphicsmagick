@@ -50,7 +50,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
     private GMService service;
 
     public GraphicsMagickImageIO() {
-        this.service = new PooledGmServiceConfig().getGraphicsMagickService();
+        this.service = PooledGmServiceConfig.getGraphicsMagickService();
     }
 
     public GraphicsMagickImageIO(GMService service) {
@@ -74,6 +74,10 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             return y;
         }
 
+        public static XY of(int x, int y) {
+            return new XY(x, y);
+        }
+
         @Override
         public String toString() {
             return "[" + x + "x" + y + "]";
@@ -84,8 +88,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
     @Override
     public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality,
-                         EnumSet<Flag> flags)
-            throws IOException {
+                         EnumSet<Flag> flags) throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
@@ -96,6 +99,8 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
                 newSuffix = "gif";
             }
             deleteTemp = true;
+        } else if ("image/webp".equals(imageInfo.getMimeType()) && flags.contains(Flag.WEBP_NOT_SUPPORTED)) {
+            newSuffix = "jpeg";
         }
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
@@ -105,8 +110,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         }
 
         // if flags does not contain auto convert || flags DOES contain flatten 
-        else if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN))
-                && !flags.contains(Flag.NO_FLATTEN)) {
+        else if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN)) && !flags.contains(Flag.NO_FLATTEN)) {
             flatten.accept((IMOperation) operation);
         }
 
@@ -127,8 +131,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
     @Override
     public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality,
-                       EnumSet<Flag> flags)
-            throws IOException {
+                       EnumSet<Flag> flags) throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
@@ -139,12 +142,21 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
                 newSuffix = "gif";
             }
             deleteTemp = true;
+        } else if ("image/webp".equals(imageInfo.getMimeType()) && flags.contains(Flag.WEBP_NOT_SUPPORTED)) {
+            newSuffix = "jpeg";
         }
         Operation operation = Convert.createImOperation(tempImageLoc, imageInfo, imageQuality, flags);
         ((IMOperation) operation).crop(size.getX(), size.getY(), offsets.getX(), offsets.getY()).interlace(interlace);
 
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
-        ofNullable(newSuffix).ifPresent(suffix -> ((IMOperation) operation).background("white").flatten());
+
+        // newsuffix is gif or newsuffix NOT set, don't flatten
+        if (newSuffix == null || newSuffix.equals("gif")) {
+        }
+        // if flags does not contain auto convert || flags DOES contain flatten 
+        else if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN)) && !flags.contains(Flag.NO_FLATTEN)) {
+            flatten.accept((IMOperation) operation);
+        }
 
         // execute the operation
         String outputFileName = null;
@@ -198,17 +210,14 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
     private String getOutputFileName(String tempImageLoc, @Nullable String suffix) throws URISyntaxException {
         Optional<String> tempSuffix = getExtensionFromFile(tempImageLoc);
-        final String name = tempSuffix
-                .map(ts -> tempImageLoc.substring(0, tempImageLoc.indexOf(ts) - 1))
-                .orElse(tempImageLoc);
+        final String name = tempSuffix.map(ts -> tempImageLoc.substring(0, tempImageLoc.indexOf(ts) - 1)).orElse(tempImageLoc);
 
         return format("%s_resize%d%s", name, random.nextInt(3), normaliseSuffix0(tempSuffix, suffix));
     }
 
     private String normaliseSuffix0(Optional<String> tempSuffix, @Nullable String suffix) {
         final String suffixOrTempSuffix = ofNullable(suffix).orElse(tempSuffix.orElse(""));
-        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".")
-                ? "." + suffixOrTempSuffix
+        final String prependedOrNull = !Strings.isNullOrEmpty(suffixOrTempSuffix) && !suffixOrTempSuffix.startsWith(".") ? "." + suffixOrTempSuffix
                 : suffixOrTempSuffix;
 
         return ofNullable(prependedOrNull).orElse("").toLowerCase();
@@ -239,9 +248,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
             if (width == null || height == null || !type.isPresent()) {
                 throw new IllegalArgumentException("error parsing result from graphics magick: " + execute + " cannot get image info");
             }
-            final String mimeType = type
-                    .map(t -> "image/" + t.toLowerCase())
-                    .orElse("application/octet-stream");
+            final String mimeType = type.map(t -> "image/" + t.toLowerCase()).orElse("application/octet-stream");
             final String topName = Regex.extractMatch("\\s*name=(\\w+)\\s*", execute).orElse(null);
 
             boolean multiFrame = Regex.isMatch("([\\S\\s]*width[\\s\\S]*){2,}", execute);
@@ -252,7 +259,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
                 getImageMetaData(tempImageLoc, format).ifPresent(imageInfo::setMetaData);
             }
 
-            LOG.debug("returning image info {} for url {}", imageInfo, tempImageLoc);
+            LOG.trace("returning image info {} for url {}", imageInfo, tempImageLoc);
             return imageInfo;
         } catch (IM4JavaException | InterruptedException e) {
             throw new GraphicsMagickException(null, e.getMessage(), e);
