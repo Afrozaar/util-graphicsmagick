@@ -88,17 +88,12 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
     @Override
     public String resize(String tempImageLoc, int maximumWidth, int maximumHeight, @Nullable String newSuffix, @Nullable Double imageQuality,
-                         EnumSet<Flag> flags) throws IOException {
+            EnumSet<Flag> flags) throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
         if ("image/gif".equals(imageInfo.getMimeType()) && imageInfo.isMultiFrame()) {
-            tempImageLoc = coalesce(tempImageLoc, imageInfo);
-            interlace = "None";
-            if (flags.contains(Flag.AUTO_CONVERT) && newSuffix != null) {
-                newSuffix = "gif";
-            }
-            deleteTemp = true;
+            return tempImageLoc;
         } else if ("image/webp".equals(imageInfo.getMimeType()) && flags.contains(Flag.WEBP_NOT_SUPPORTED)) {
             newSuffix = "jpeg";
         }
@@ -106,8 +101,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         ((IMOperation) operation).resize(maximumWidth, maximumHeight, ">").interlace(interlace);
 
         // newsuffix is gif or newsuffix NOT set, don't flatten
-        if (newSuffix == null || newSuffix.equals("gif")) {
-        }
+        if (newSuffix == null || newSuffix.equals("gif")) {}
 
         // if flags does not contain auto convert || flags DOES contain flatten 
         else if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN)) && !flags.contains(Flag.NO_FLATTEN)) {
@@ -131,7 +125,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
 
     @Override
     public String crop(String tempImageLoc, XY size, XY offsets, @Nullable XY resizeXY, @Nullable String newSuffix, @Nullable Double imageQuality,
-                       EnumSet<Flag> flags) throws IOException {
+            EnumSet<Flag> flags) throws IOException {
         String interlace = "Line";
         boolean deleteTemp = false;
         ImageInfo imageInfo = getImageInfo(tempImageLoc, false, null);
@@ -151,8 +145,7 @@ public class GraphicsMagickImageIO extends AbstractImageIO {
         ofNullable(resizeXY).ifPresent(xy -> ((IMOperation) operation).resize(xy.getX(), xy.getY(), ">"));
 
         // newsuffix is gif or newsuffix NOT set, don't flatten
-        if (newSuffix == null || newSuffix.equals("gif")) {
-        }
+        if (newSuffix == null || newSuffix.equals("gif")) {}
         // if flags does not contain auto convert || flags DOES contain flatten 
         else if ((!flags.contains(Flag.AUTO_CONVERT) || flags.contains(Flag.FLATTEN)) && !flags.contains(Flag.NO_FLATTEN)) {
             flatten.accept((IMOperation) operation);
